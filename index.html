@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="./kimsze_sharp16.ico?v=20260111a" sizes="any">
+  <link rel="shortcut icon" href="./kimsze_sharp16.ico?v=20260111a">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>One Minute Dash — Phonograms & HFW (xAPI Base)</title>
+
+  <!-- xAPI base scripts (UNCHANGED) -->
+  <script>
+    window.ACTIVITY_ID = "https://github.com/limkimsze-maker/consonants/blob/915c8b275fbde80b1a569ba601ab800869d6e313/ActivityID";
+  </script>
+  <script src="xapiwrapper.min.js"></script>
+  <script src="index.js" defer></script>
+
+  <!-- New-Session Clear Kit (drop-in) -->
+  <script>
+  (function (global){
+    const Kit = {
+      init(opts = {}) {
+        const ACTIVITY_ID = String(opts.activityId || global.ACTIVITY_ID || location.href);
+        const QS = new URLSearchParams(location.search);
+        const salt = (typeof opts.scopeSalt === 'function') ? (opts.scopeSalt(QS) || '') : (opts.scopeSalt || '');
+        const baseQS = QS.get('attempt') || QS.get('run') || QS.get('session') || QS.toString() || 'noqs';
+        const CURR_SCOPE = `${ACTIVITY_ID}::${salt}::${baseQS}`;
+        const SCOPE_KEY  = `sls_scope::${ACTIVITY_ID}`;
+        const resetParam = opts.resetParam || 'reset';
+        const FORCE = QS.has(resetParam) || QS.has('newSession');
+
+        let prev = null;
+        try { prev = localStorage.getItem(SCOPE_KEY); } catch (e) {}
+
+        const isNew = FORCE || prev !== CURR_SCOPE;
+        if (isNew) {
+          if (opts.clickButtonId) {
+            const btn = document.getElementById(opts.clickButtonId);
+            if (btn) {
+              try { btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })); } catch (e) {}
+            }
+          }
+          if (typeof opts.onNewSession === 'function') {
+            try { opts.onNewSession(); } catch (e) {}
+          }
+          if (opts.pushZero !== false) {
+            const payload = { score: 0 };
+            try { if (typeof global.storeState === 'function') global.storeState(payload); } catch (e) {}
+            try { if (typeof global.sendState  === 'function') global.sendState(payload);  } catch (e) {}
+          }
+          try { localStorage.setItem(SCOPE_KEY, CURR_SCOPE); } catch (e) {}
+        }
+        return { isNewAssignment: isNew, scope: CURR_SCOPE };
+      }
+    };
+    global.NewSessionClearKit = Kit;
+  })(window);
+  </script>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --ink:#0f172a;
+      --muted:#637083;
+      --line:#e9eef7;
+      --brand:#2563eb;
+      --good:#16a34a;
+      --bad:#e11d48;
+      --warn:#d97706;
+      --pill:#111827;
+
+      --radius:16px;
+      --shadow: 0 16px 40px rgba(0,0,0,.08);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      font-family:"Lexend", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      min-height:100vh;
+      padding:16px;
+      gap:20px;
+    }
+
+    /* Keep xAPI base hidden but present */
+    .container{
+      background:#fff;
+      padding:10px;
+      border-radius:8px;
+      box-shadow:0 0 5px rgba(0,0,0,.08);
+      width:590px;
+      height:470px;
+      overflow:auto;
+    }
+    #xapiBase{ display:none; }
+
+    /* App shell */
+    #omdApp{
+      width:min(1200px, 95vw);
+      background:var(--card);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      padding:22px 22px 26px;
+      position:relative;
+    }
+
+    header{
+      display:grid;
+      gap:8px;
+      margin-bottom:12px;
+    }
+    header h1{
+      margin:0;
+      font-size:22px;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    header p{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.35;
+    }
+
+    .topbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:6px;
+    }
+
+    .statusBadge{
+      background:#0f172a;
+      color:#fff;
+      padding:8px 12px;
+      border-radius:12px;
+      font-size:12px;
+      white-space:nowrap;
+      max-width:75ch;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      display:none;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns: 360px 1fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .panel{
+      background:#fbfcff;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      overflow:auto;
+      max-height:70vh;
+    }
+    .control{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      margin-bottom:12px;
+    }
+    .control h3{
+      margin:0 0 8px;
+      font-size:15px;
+    }
+    .hint{
+      font-size:12px;
+      color:#64748b;
+      margin-top:6px;
+      line-height:1.35;
+    }
+
+    .row-small{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:900;
+      color:#fff;
+      transition:transform .06s ease, box-shadow .18s ease, filter .18s ease;
+      box-shadow: 0 10px 22px rgba(0,0,0,.10);
+    }
+    .btn:active{ transform:translateY(1px); box-shadow: 0 6px 14px rgba(0,0,0,.10); }
+    .btn.ghost{
+      background:#fff;
+      color:var(--brand);
+      border:1px solid #cfe1ff;
+      box-shadow:none;
+    }
+    .btn.ok{ background:var(--good); }
+    .btn.bad{ background:var(--bad); }
+    .btn.warn{ background:var(--warn); }
+    .btn.primary{ background:var(--brand); }
+    .btn.small{ padding:8px 10px; font-size:13px; border-radius:10px; }
+    .btn.disabled{ opacity:.55; pointer-events:none; }
+
+    .seg{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .seg button{
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--ink);
+      font-weight:900;
+      cursor:pointer;
+    }
+    .seg button.active{
+      border-color:#bfdbfe;
+      background:#eff6ff;
+      color:#1e3a8a;
+    }
+
+    select, input[type="number"], textarea{
+      font-family:inherit;
+      font-size:14px;
+    }
+    select, input[type="number"]{
+      width:100%;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#fff;
+      color:var(--ink);
+      font-weight:700;
+    }
+    textarea{
+      width:100%;
+      min-height:96px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      resize:vertical;
+      font-weight:700;
+    }
+
+    .pillRow{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      padding:6px 10px;
+      border-radius:999px;
+      background:var(--pill);
+      color:#fff;
+      font-size:13px;
+      font-weight:800;
+    }
+    .pill.good{ background:#065f46; }
+    .pill.bad{ background:#991b1b; }
+    .pill.neutral{ background:#111827; }
+
+    /* Dash view */
+    .view{ display:none; }
+    .view.active{ display:block; }
+
+    .dashCard{
+      background:#fff;
+      border:1px solid #f1f1f4;
+      border-radius:18px;
+      padding:18px;
+      display:grid;
+      gap:12px;
+      justify-items:center;
+      text-align:center;
+    }
+
+    .timer{
+      font-size:44px;
+      font-weight:1000;
+      letter-spacing:1px;
+      color:#0f172a;
+    }
+    .timer.soon{ color:#b45309; }
+    .timer.zero{ color:#991b1b; }
+
+    .bigItem{
+      font-size:clamp(54px, 10vw, 140px);
+      font-weight:1000;
+      letter-spacing:2px;
+      padding:10px 18px;
+      border-radius:16px;
+      border:1px solid #e9eef7;
+      background:#fff;
+      line-height:1;
+      color:#000;
+      min-width:min(520px, 92%);
+    }
+
+    .metaLine{
+      color:#64748b;
+      font-size:13px;
+      font-weight:700;
+    }
+    .kpi{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
+      color:#0f172a;
+      font-size:13px;
+    }
+    .kpi span{
+      background:#f8fafc;
+      border:1px solid #e2e8f0;
+      border-radius:999px;
+      padding:6px 10px;
+      font-weight:900;
+    }
+
+    /* Chart table */
+    .chartWrap{ overflow:auto; }
+    table{
+      border-collapse:separate;
+      border-spacing:0;
+      width:100%;
+      font-size:13px;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:14px;
+      overflow:hidden;
+    }
+    th, td{
+      padding:8px 10px;
+      border-bottom:1px solid var(--line);
+      border-right:1px solid var(--line);
+      text-align:center;
+      vertical-align:middle;
+      white-space:nowrap;
+    }
+    th{
+      background:#eff6ff;
+      color:#1e3a8a;
+      font-weight:1000;
+    }
+    tr:last-child td{ border-bottom:none; }
+    td:last-child, th:last-child{ border-right:none; }
+    .left{ text-align:left; }
+    .typeCell{
+      font-weight:1000;
+      color:#111827;
+      background:#fbfcff;
+    }
+    .mutedCell{ color:#94a3b8; }
+
+    .historyCard{
+      display:grid;
+      gap:8px;
+    }
+    .histItem{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px;
+      background:#fff;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .histItem b{ font-weight:1000; }
+    .histItem small{ color:#64748b; font-weight:700; }
+    .histItem .rightSide{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      align-items:center;
+    }
+
+    /* Review grid */
+    .review-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:12px; }
+    .review-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      text-align:center;
+      display:grid;
+      gap:10px;
+    }
+    .review-card .bigItem{
+      font-size:56px;
+      min-width:auto;
+      width:100%;
+      padding:10px 12px;
+    }
+
+    /* Sound toggle */
+    .toggle{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      cursor:pointer;
+      user-select:none;
+      font-weight:1000;
+      color:#111827;
+    }
+    .toggle .dot{
+      width:10px; height:10px; border-radius:999px;
+      background:#94a3b8;
+    }
+    .toggle.on{ border-color:#bbf7d0; background:#ecfdf5; color:#065f46; }
+    .toggle.on .dot{ background:#16a34a; }
+
+    /* Footer credit */
+    .credit{
+      margin-top:10px;
+      color:#64748b;
+      font-size:12px;
+      text-align:center;
+      font-weight:700;
+      line-height:1.35;
+    }
+
+    /* Audio element hidden (sound can still play) */
+    #player{ position:fixed; left:12px; bottom:12px; width:280px; display:none; }
+
+    @media (max-width: 980px){
+      .row{ grid-template-columns: 1fr; }
+      .bigItem{ min-width:auto; width:100%; }
+    }
+  </style>
+
+  <script src="https://cdn.counter.dev/script.js" data-id="825e93b6-ce99-40ef-8bcc-125f13297433" data-utcoffset="8"></script>
+</head>
+
+<body>
+  <!-- xAPI base (kept but hidden) -->
+  <div id="xapiBase" class="container">
+    <p class="center"><strong>HTML5 Interactive</strong></p>
+    <div class="center">
+      <label for="score-input">Score:</label>
+      <input type="text" id="score-input" />
+      <label for="feedback-input">Feedback:</label>
+      <input type="text" id="feedback-input" placeholder="Enter feedback" />
+    </div>
+    <div id="criteria-container" class="center"></div>
+    <div class="center">
+      <button id="add-criteria-button">Add Rubric Criteria</button>
+    </div>
+    <div class="center">
+      <button id="save-store">Send/Save</button>
+      <button id="clear-inputs">Clear</button>
+    </div>
+    <div class="output-container">
+      <pre id="result"></pre>
+      <hr class="separator" />
+      <pre id="getState"></pre>
+      <hr class="separator" />
+      <pre id="questionId"></pre>
+      <pre id="userId"></pre>
+      <pre id="cookieId"></pre>
+      <a id="activityLink" href="https://github.com/limkimsze-maker/consonants/blob/915c8b275fbde80b1a569ba601ab800869d6e313/ActivityID" target="_blank" rel="noopener">ActivityID</a>
+    </div>
+  </div>
+
+  <!-- One Minute Dash App -->
+  <div id="omdApp">
+    <header>
+      <h1>🏃‍♂️ One Minute Dash</h1>
+      <p>
+        <b>a)</b> Set target with students → <b>b)</b> Read as many as possible in 1 minute → <b>c)</b> Review errors →
+        <b>d)</b> Count correct → <b>e)</b> Read remaining items.
+      </p>
+
+      <div class="topbar">
+        <div class="row-small">
+          <div id="soundToggle" class="toggle" role="switch" aria-checked="false" tabindex="0" title="Sound is OFF by default">
+            <span class="dot" aria-hidden="true"></span>
+            <span id="soundLabel">Sound: OFF</span>
+          </div>
+          <button class="btn ghost small" id="exportBtn" type="button">Download JSON</button>
+          <button class="btn ghost small" id="importBtn" type="button">Import JSON</button>
+          <button class="btn warn small" id="clearHistoryBtn" type="button">Clear history</button>
+          <button class="btn ghost small" id="newSessionBtn" type="button">New session (clear SLS attempt)</button>
+          <input id="importFile" type="file" accept="application/json" class="hidden" style="display:none;">
+        </div>
+
+        <div id="statusBadge" class="statusBadge" aria-live="polite"></div>
+      </div>
+    </header>
+
+    <!-- SETUP VIEW -->
+    <section id="setupView" class="view active">
+      <div class="row">
+        <section class="controls">
+          <div class="control">
+            <h3>1) Mode</h3>
+            <div class="seg" aria-label="Select dash type">
+              <button id="modeP" type="button" class="active">P — Phonograms</button>
+              <button id="modeH" type="button">HFW — High Frequency Words</button>
+            </div>
+            <div class="hint">
+              For HFW: selecting a Cycle/Session uses a cumulative scope (all HFW taught up to that point). Target defaults to the HFW scope size.
+            </div>
+          </div>
+
+          <div class="control">
+            <h3>2) We are at (Cycle & Session)</h3>
+            <div class="row-small">
+              <div style="flex:1; min-width:220px;">
+                <label class="hint" for="atSelect">Quick pick (available sessions)</label>
+                <select id="atSelect"></select>
+              </div>
+              <div style="flex:1; min-width:140px;">
+                <label class="hint" for="cycleSel">Cycle</label>
+                <select id="cycleSel"></select>
+              </div>
+              <div style="flex:1; min-width:140px;">
+                <label class="hint" for="sessSel">Session</label>
+                <select id="sessSel"></select>
+              </div>
+            </div>
+            <div class="hint" id="scopeHint">—</div>
+          </div>
+
+          <div class="control" id="hfwEditor" style="display:none;">
+            <h3>HFW words for selected Cycle/Session</h3>
+            <div class="hint">These are preloaded. You can edit if needed (one per line OR separated by commas), then save.</div>
+            <textarea id="hfwText" placeholder="e.g. the&#10;and&#10;is&#10;to"></textarea>
+            <div class="row-small" style="margin-top:8px; justify-content:space-between;">
+              <div class="hint" id="hfwCountHint">0 words saved for this session</div>
+              <button class="btn primary small" id="saveHfwBtn" type="button">Save HFW list</button>
+            </div>
+          </div>
+
+          <div class="control">
+            <h3>3) Target</h3>
+            <div class="row-small">
+              <div style="flex:1; min-width:200px;">
+                <label class="hint" for="targetInput">Target number (goal)</label>
+                <input type="number" id="targetInput" min="0" value="0" />
+              </div>
+              <div style="display:grid; gap:6px; align-content:end;">
+                <button class="btn ghost small" id="autoTargetBtn" type="button">Auto = scope size</button>
+              </div>
+            </div>
+            <div class="hint" id="targetHint">—</div>
+          </div>
+
+          <div class="control">
+            <h3>4) Order</h3>
+            <div class="row-small">
+              <label style="font-weight:900;"><input type="radio" name="order" value="sequence" checked> Sequence</label>
+              <label style="font-weight:900;"><input type="radio" name="order" value="random"> Randomised</label>
+            </div>
+            <div class="hint">Timer is fixed at 60 seconds.</div>
+          </div>
+
+          <div class="control">
+            <h3>Start</h3>
+            <div class="row-small">
+              <button class="btn ok" id="startBtn" type="button">Start 60s Dash</button>
+              <button class="btn ghost" id="resetBtn" type="button">Reset selection</button>
+            </div>
+            <div class="hint">
+              Tip: The chart below tracks Target vs Actual for each Cycle & Session.
+              Records are saved locally in this browser (and you can download JSON for backup).
+              Chart updates after every dash (Phonograms or HFW).
+            </div>
+          </div>
+
+          <div class="credit">
+            Designed by Lim Kim Sze © 2026<br>
+            (Phonogram audio uses your existing <code>audio/</code> folder if present; HFW tries <code>audio/words/</code>, then speech fallback.)
+          </div>
+        </section>
+
+        <section class="panel">
+          <h3 style="margin:4px 0 10px;">One Minute Dash Chart (Target vs Actual)</h3>
+          <div class="chartWrap" id="chartWrap"></div>
+
+          <hr style="margin:14px 0; border-color:#eef2ff;" />
+
+          <h3 style="margin:4px 0 10px;">Recent records</h3>
+          <div id="historyHost" class="historyCard"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- DASH VIEW -->
+    <section id="dashView" class="view">
+      <div class="dashCard">
+        <div class="row-small" style="width:100%; justify-content:space-between; gap:10px;">
+          <button class="btn ghost small" id="backSetupFromDash" type="button">← Back</button>
+          <div class="timer" id="timerTxt" aria-live="polite">01:00</div>
+          <button class="btn ghost small" id="pauseBtn" type="button" title="Pausing stops the timer">Pause</button>
+        </div>
+
+        <div class="kpi" id="kpiLine">
+          <span>Target: <b id="kpiTarget">0</b></span>
+          <span>Correct: <b id="kpiCorrect">0</b></span>
+          <span>Wrong: <b id="kpiWrong">0</b></span>
+          <span>Attempted: <b id="kpiAttempted">0</b></span>
+        </div>
+
+        <div class="metaLine" id="dashMeta">—</div>
+
+        <div class="bigItem" id="dashItem">—</div>
+
+        <div class="row-small" style="justify-content:center;">
+          <button class="btn ghost small" id="playBtn" type="button">🔊 Play</button>
+        </div>
+
+        <div class="row-small" style="justify-content:center; gap:12px;">
+          <button class="btn ok" id="yesBtn" type="button" style="min-width:140px;">Yes</button>
+          <button class="btn bad" id="noBtn" type="button" style="min-width:140px;">No</button>
+        </div>
+
+        <div class="hint" id="dashProgress">—</div>
+      </div>
+    </section>
+
+    <!-- RESULTS VIEW -->
+    <section id="resultView" class="view">
+      <div class="control">
+        <h3>Dash summary</h3>
+        <p id="summaryLine" style="margin:6px 0 0; font-weight:900;">—</p>
+        <p id="summaryMeta" class="hint" style="margin:6px 0 0;">—</p>
+
+        <div id="listsWrap" style="display:grid; gap:12px; margin-top:12px;">
+          <div>
+            <h4 style="margin:0 0 6px;">✔ Correct</h4>
+            <div id="correctList" class="pillRow"></div>
+          </div>
+          <div>
+            <h4 style="margin:0 0 6px;">✖ Incorrect (Visual Drill / recap next session)</h4>
+            <div id="wrongList" class="pillRow"></div>
+          </div>
+          <div>
+            <h4 style="margin:0 0 6px;">⏳ Not attempted (remaining)</h4>
+            <div id="remainList" class="pillRow"></div>
+          </div>
+        </div>
+
+        <div class="row-small" style="margin-top:12px; justify-content:flex-end;">
+          <button class="btn primary" id="reviewWrongBtn" type="button">Review wrong items</button>
+          <button class="btn ghost" id="readRemainingBtn" type="button">Read remaining (untimed)</button>
+          <button class="btn ghost" id="backSetupFromResult" type="button">Back to setup</button>
+        </div>
+
+        <div class="hint" style="margin-top:10px;">
+          Record storage: saved automatically to this browser (localStorage). Use “Download JSON” for backup or transfer to another device.
+        </div>
+      </div>
+    </section>
+
+    <!-- REVIEW WRONG VIEW -->
+    <section id="reviewView" class="view">
+      <div class="control">
+        <div class="row-small" style="justify-content:space-between;">
+          <h3 style="margin:0;">Review wrong items</h3>
+          <button class="btn ghost small" id="backToResultFromReview" type="button">← Back</button>
+        </div>
+        <p class="hint" style="margin-top:6px;">Tap the phonogram/word buttons to hear them. Mark as reviewed when ready.</p>
+        <div id="reviewGrid" class="review-grid" style="margin-top:10px;"></div>
+
+        <div class="row-small" style="margin-top:12px; justify-content:flex-end;">
+          <button class="btn ok" id="finishReviewBtn" type="button">Complete review</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- READ REMAINING VIEW -->
+    <section id="remainingView" class="view">
+      <div class="dashCard">
+        <div class="row-small" style="width:100%; justify-content:space-between;">
+          <button class="btn ghost small" id="backToResultFromRemaining" type="button">← Back</button>
+          <div style="font-weight:1000;">Read remaining (untimed)</div>
+          <div class="hint" id="remainProg">—</div>
+        </div>
+
+        <div class="bigItem" id="remainItem">—</div>
+
+        <div class="row-small" style="justify-content:center;">
+          <button class="btn ghost small" id="remainPlayBtn" type="button">🔊 Play</button>
+        </div>
+
+        <div class="row-small" style="justify-content:center; gap:12px;">
+          <button class="btn ok" id="remainYesBtn" type="button" style="min-width:140px;">Correct</button>
+          <button class="btn bad" id="remainNoBtn" type="button" style="min-width:140px;">Wrong</button>
+        </div>
+
+        <div class="hint" id="remainHint">Wrong items here will be shown at the end (for recap).</div>
+      </div>
+    </section>
+  </div>
+
+  <audio id="player" preload="auto" playsinline></audio>
+
+  <script>
+  (function(){
+    /* =========================
+       Storage keys
+    ========================= */
+    const KEY_RECORDS = 'omd_records_v1';
+    const KEY_HFW_DB  = 'omd_hfw_db_v1';
+    const KEY_SOUND   = 'omd_soundOn_v1';
+
+    /* =========================
+       xAPI helpers (safe)
+    ========================= */
+    function pushToXAPI(score, feedback){
+      try {
+        const sInput = document.getElementById('score-input');
+        const fInput = document.getElementById('feedback-input');
+        if (sInput) sInput.value = String(score ?? 0);
+        if (fInput) fInput.value = String(feedback ?? '');
+        if (typeof updateStore === 'function') updateStore();
+        else if (typeof storeState === 'function') storeState({ score, feedback });
+        const badge = document.getElementById('statusBadge');
+        if (badge){
+          badge.style.display = 'block';
+          badge.textContent = `Saved for SLS · Score ${score}${feedback ? ' · ' + (feedback.length>60 ? (feedback.slice(0,60)+'…') : feedback) : ''}`;
+        }
+      } catch(e) {}
+    }
+
+    /* =========================
+       Session ordering (18 cycles × 3 sessions)
+       We will NOT invent missing cycles' items;
+       they just remain blank.
+    ========================= */
+    const TOTAL_CYCLES = 18;
+    const SESSIONS_PER_CYCLE = 3;
+
+    function makeSessionId(c,s){ return `C${c}S${s}`; }
+    function parseSessionId(id){
+      const m = String(id||'').match(/^C(\d+)S(\d+)$/);
+      return m ? { cycle: parseInt(m[1],10), session: parseInt(m[2],10) } : { cycle: 0, session: 0 };
+    }
+
+    const SESSION_ORDER = [];
+    for (let c=1; c<=TOTAL_CYCLES; c++){
+      for (let s=1; s<=SESSIONS_PER_CYCLE; s++){
+        SESSION_ORDER.push(makeSessionId(c,s));
+      }
+    }
+
+    /* =========================
+       Phonogram DB (FROM YOUR HTML)
+       (Cycles not included means you do not have them — we keep as-is.)
+    ========================= */
+    const DB = [
+      { id: "C1S1", title: "C1S1: Review consonant and vowel graphs", items: ["a","e","i","o","u","b","c-hard","d","f","g-hard","h","j","k","l","m","n","p","qu","r","s","t","v","w","x","y","z"] },
+      { id: "C1S2", title: "C1S2: Digraphs [ch, sh, th]", items: ["ch","sh","th"] },
+
+      { id: "C2S1", title: "C2S1: Floss rule [-ff, -ll, -ss, -zz]", items: ["-ff","-ll","-ss","-zz"] },
+      { id: "C2S2", title: "C2S2: -ck rule", items: ["-ck"] },
+      { id: "C2S3", title: "C2S3: -tch rule", items: ["-tch"] },
+
+      { id: "C3S1", title: "C3S1: -dge rule", items: ["dge"] },
+      { id: "C3S2", title: "C3S2: Magic-e rule", items: ["a-e","e-e","i-e","o-e","u-e"] },
+
+      { id: "C6S1", title: "C6S1: Consonant -le blends [-ble, -dle]", items: ["-ble","-dle"] },
+      { id: "C6S2", title: "C6S2: Consonant -le blends [-ple, -tle, -gle]", items: ["-ple","-tle","-gle"] },
+      { id: "C6S3", title: "C6S3: r-controlled vowels [ar, or]", items: ["ar","or"] },
+
+      { id: "C7S1", title: "C7S1: r-controlled vowels [ir, er, ur]", items: ["ir","er","ur"] },
+      { id: "C7S2", title: "C7S2: Vowel graphs [y_vowel_sounds]", items: ["y-vowel"] },
+
+      { id: "C8S1", title: "C8S1: Soft ‘c’ & Soft ‘g’ rule", items: ["c-soft","g-soft"] },
+      { id: "C8S2", title: "C8S2: Vowel teams [‘ay’, ‘ai’ say /ā/]", items: ["ai","ay"] },
+
+      { id: "C9S1", title: "C9S1: Vowel team [‘ee’ says /ē/]", items: ["ee"] },
+      { id: "C9S2", title: "C9S2: Vowel team [‘ea’ says /ĕ/ or /ē/]", items: ["ea-short-e","ea"] },
+      { id: "C9S3", title: "C9S3: Vowel team [‘ie’ says /ī/ or /ē/]", items: ["ie"] },
+
+      { id: "C10S1", title: "C10S1: Vowel team [‘ei’ says /ē/ or /ā/]", items: ["ei"] },
+      { id: "C10S2", title: "C10S2: Vowel team [‘ey’ says /ā/ or /ē/]", items: ["ey"] },
+
+      { id: "C11S1", title: "C11S1: Vowel teams [‘oa’, ‘ow’ says /ō/]", items: ["oa","ow-long-o"] },
+      { id: "C11S2", title: "C11S2: Vowel team [‘oo’ — long & short sounds]", items: ["oo"] },
+      { id: "C11S3", title: "C11S3: Vowel teams [‘ue’, ‘ew’, ‘ui’ say /oo/]", items: ["ue","ew","ui"] },
+
+      { id: "C12S1", title: "C12S1: Vowel teams [‘ue’, ‘ew’ say /ū/]", items: ["ue-u","ew-u"] },
+      { id: "C12S2", title: "C12S2: Vowel team [‘aw’ says /aw/]", items: ["aw"] },
+
+      { id: "C13S1", title: "C13S1: Vowel teams [‘ou’, ‘ow’ say /ow/]", items: ["ou","ow"] },
+      { id: "C13S2", title: "C13S2: Vowel team [‘oi’, ‘oy’ say /oi/]", items: ["oi","oy"] },
+      { id: "C13S3", title: "C13S3: Vowel team [‘igh’ says /ī/]", items: ["igh"] },
+
+      { id: "C14S1", title: "C14S1: Consonant digraph [‘kn’ says /n/]", items: ["kn"] },
+      { id: "C14S2", title: "C14S2: Consonant digraph [‘ng’ says /ŋ/, ‘nk’ says /ŋk/]", items: ["ng","nk"] },
+
+      { id: "C16S1", title: "C16S1: Plural suffixes ‘-s’ and ‘-es’", items: ["-s","-es"] },
+      { id: "C16S2", title: "C16S2: Past Tense Suffix ‘-ed’", items: ["-ed"] },
+      { id: "C16S3", title: "C16S3: Prefixes ‘un-’ and ‘in-'", items: ["un-","in-"] },
+
+      { id: "C17S1", title: "C17S1: Suffixes ‘-ing’ and ‘-ful’", items: ["-ing","-ful"] },
+      { id: "C17S2", title: "C17S2: Prefixes ‘re-’ and ‘dis-’", items: ["re-","dis-"] },
+      { id: "C17S3", title: "C17S3: Comparative/ Superlative Suffixes ‘-er’ and ‘-est’", items: ["-er","-est"] },
+
+      { id: "C18S1", title: "C18S1: Prefix ‘mis-’", items: ["mis-"] },
+      { id: "C18S2", title: "C18S2: Prefix ‘pre-’", items: ["pre-"] },
+      { id: "C18S3", title: "C18S3: Suffix ‘-less’", items: ["-less"] },
+    ];
+
+    const P_MAP = Object.create(null);      // sessionId -> items[]
+    const TITLE_MAP = Object.create(null);  // sessionId -> title
+    DB.forEach(s=>{
+      P_MAP[s.id] = (s.items || []).slice();
+      TITLE_MAP[s.id] = s.title || s.id;
+    });
+
+    /* =========================
+       HFW DB (preloaded lesson plan words + teacher editable)
+       Stored as { "C1S1": ["our","..."], ... }
+    ========================= */
+    const HFW_SEED = {
+      "C1S1": ["our"],
+      "C1S2": ["ask"],
+      "C1S3": ["work"],
+
+      "C2S1": ["have","year"],
+      "C2S2": ["give","only"],
+      "C2S3": ["want","does"],
+
+      "C3S1": ["here","more"],
+      "C3S2": ["move","your"],
+      "C3S3": ["some","come"],
+
+      "C4S3": ["there"],
+
+      "C5S1": ["where"],
+      "C5S2": ["their"],
+      "C5S3": ["great"],
+
+      "C6S1": ["before","because"],
+      "C6S2": ["after","would"],
+      "C6S3": ["should","could"],
+
+      "C7S1": ["mother","father"],
+      "C7S2": ["through","learn"],
+
+      "C8S1": ["own","hear","near"],
+      "C8S2": ["above","school","eyes"],
+      "C8S3": ["almost","always","most"],
+
+      "C9S1": ["change","sometimes","something"],
+      "C9S2": ["air","words","sentence"],
+      "C9S3": ["second","four","fall"],
+
+      "C10S1": ["people","aunt","uncle"],
+      "C10S2": ["early","fast","last"],
+      "C10S3": ["young","country","island"],
+
+      "C11S1": ["earth","water","world"],
+      "C11S2": ["questions","answer","sure"],
+      "C11S3": ["money"],
+
+      "C12S1": ["upon","once","both"],
+      "C12S2": ["hours","minutes","figure"],
+      "C12S3": ["done","brought","special"],
+
+      "C13S1": ["half","equation","rule"],
+      "C13S2": ["heard","friends","carefully"],
+      "C13S3": ["nothing","enough","fire"],
+
+      "C14S1": ["though","door","while"],
+      "C14S2": ["group","material","idea"],
+      "C14S3": ["language","clear","thought"]
+    };
+
+    function loadHfwDb(){
+      try{
+        const raw = localStorage.getItem(KEY_HFW_DB);
+        return raw ? JSON.parse(raw) : {};
+      }catch(e){ return {}; }
+    }
+    function saveHfwDb(db){
+      try{ localStorage.setItem(KEY_HFW_DB, JSON.stringify(db)); }catch(e){}
+    }
+
+    let HFW_DB = loadHfwDb();
+
+    // Seed missing sessions (do NOT overwrite teacher edits)
+    (function seedHfwOnce(){
+      let changed = false;
+      for(const sid of Object.keys(HFW_SEED)){
+        const seed = HFW_SEED[sid];
+        if(!Array.isArray(seed) || !seed.length) continue;
+        const curr = HFW_DB[sid];
+        if(!Array.isArray(curr) || curr.length === 0){
+          HFW_DB[sid] = seed.slice();
+          changed = true;
+        }
+      }
+      if(changed) saveHfwDb(HFW_DB);
+    })();
+
+    /* =========================
+       Records history
+    ========================= */
+    function loadRecords(){
+      try{
+        const raw = localStorage.getItem(KEY_RECORDS);
+        return raw ? JSON.parse(raw) : [];
+      }catch(e){ return []; }
+    }
+    function saveRecords(list){
+      try{ localStorage.setItem(KEY_RECORDS, JSON.stringify(list)); }catch(e){}
+    }
+    let RECORDS = loadRecords();
+
+    /* =========================
+       Sound
+    ========================= */
+    const soundToggle = document.getElementById('soundToggle');
+    const soundLabel  = document.getElementById('soundLabel');
+    let SOUND_ON = false;
+
+    function setSound(on){
+      SOUND_ON = !!on;
+      soundToggle.classList.toggle('on', SOUND_ON);
+      soundToggle.setAttribute('aria-checked', SOUND_ON ? 'true' : 'false');
+      soundLabel.textContent = SOUND_ON ? 'Sound: ON' : 'Sound: OFF';
+      try{ localStorage.setItem(KEY_SOUND, SOUND_ON ? '1':'0'); }catch(e){}
+    }
+    (function initSound(){
+      let v = null;
+      try{ v = localStorage.getItem(KEY_SOUND); }catch(e){}
+      // default OFF
+      setSound(v === '1');
+    })();
+
+    function toggleSound(){ setSound(!SOUND_ON); }
+    soundToggle.addEventListener('click', toggleSound);
+    soundToggle.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleSound(); }
+    });
+
+    /* =========================
+       Audio helpers
+    ========================= */
+    const AUDIO_BASE = 'audio/';
+    const WORD_BASE  = 'audio/words/';
+    const AUDIO_EXTS = ['mp3','m4a','mp4','wav','ogg'];
+    const FILE_ALIASES = {};
+
+    function sanitizePhonogramName(item){
+      const raw = (FILE_ALIASES[item] ?? item);
+      return String(raw).replace(/[^a-zA-Z0-9-]+/g,'');
+    }
+    function sanitizeWord(w){
+      return String(w).toLowerCase().replace(/[^a-z]/g,'');
+    }
+
+    async function playViaPlayer(paths){
+      const player = document.getElementById('player');
+      for(const p of paths){
+        try{
+          player.pause();
+          player.currentTime = 0;
+          player.src = p;
+          await player.play();
+          return true;
+        }catch(e){}
+      }
+      return false;
+    }
+    function speak(text){
+      try{
+        const synth = window.speechSynthesis;
+        if(!synth) return;
+        const utter = new SpeechSynthesisUtterance(String(text));
+        utter.rate = 0.95;
+        utter.pitch = 1.0;
+        synth.cancel();
+        synth.speak(utter);
+      }catch(e){}
+    }
+    async function playPhonogramSound(item){
+      const name = sanitizePhonogramName(item);
+      const candidates = AUDIO_EXTS.map(ext => `${AUDIO_BASE}${name}.${ext}`);
+      const ok = await playViaPlayer(candidates);
+      if(!ok) speak(item);
+    }
+    async function playWordSound(word){
+      const name = sanitizeWord(word);
+      const candidates = AUDIO_EXTS.map(ext => `${WORD_BASE}${name}.${ext}`);
+      const ok = await playViaPlayer(candidates);
+      if(!ok) speak(word);
+    }
+
+    // =========================
+    // Timer ring (ALWAYS plays even if Sound toggle is OFF)
+    // Uses WebAudio oscillator. Must be "unlocked" once on a user gesture (Start button).
+    // =========================
+    let _timerCtx = null;
+
+    async function unlockTimerBeep(){
+      try{
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if(!AC) return;
+        if(!_timerCtx) _timerCtx = new AC();
+        if(_timerCtx.state === 'suspended') await _timerCtx.resume();
+
+        // Tiny near-silent blip to fully unlock audio on iOS/Safari
+        const o = _timerCtx.createOscillator();
+        const g = _timerCtx.createGain();
+        g.gain.value = 0.00001;
+        o.frequency.value = 440;
+        o.connect(g); g.connect(_timerCtx.destination);
+        o.start();
+        o.stop(_timerCtx.currentTime + 0.02);
+      }catch(e){}
+    }
+
+    // A longer "ring" (~3s), 2 groups of 3 chimes (no overlap).
+    function timerBeep(){
+      try{
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if(!AC) return;
+        if(!_timerCtx) _timerCtx = new AC();
+        if(_timerCtx.state === 'suspended') _timerCtx.resume().catch(()=>{});
+
+        const base = _timerCtx.currentTime;
+
+        const pattern = [
+          { start: 0.00, dur: 0.30, freq: 880 },
+          { start: 0.45, dur: 0.30, freq: 988 },
+          { start: 0.90, dur: 0.30, freq: 880 },
+
+          { start: 1.60, dur: 0.30, freq: 880 },
+          { start: 2.05, dur: 0.30, freq: 988 },
+          { start: 2.50, dur: 0.30, freq: 880 },
+        ];
+
+        pattern.forEach(b=>{
+          // Main tone
+          const o1 = _timerCtx.createOscillator();
+          const g1 = _timerCtx.createGain();
+          o1.type = 'sine';
+          o1.frequency.value = b.freq;
+
+          // Soft harmonic for a more "ringing" feel
+          const o2 = _timerCtx.createOscillator();
+          const g2 = _timerCtx.createGain();
+          o2.type = 'triangle';
+          o2.frequency.value = b.freq * 2;
+
+          const t0 = base + b.start;
+          const t1 = t0 + b.dur;
+
+          // Envelope
+          g1.gain.setValueAtTime(0.0001, t0);
+          g1.gain.exponentialRampToValueAtTime(0.28, t0 + 0.02);
+          g1.gain.exponentialRampToValueAtTime(0.0001, t1);
+
+          g2.gain.setValueAtTime(0.0001, t0);
+          g2.gain.exponentialRampToValueAtTime(0.10, t0 + 0.02);
+          g2.gain.exponentialRampToValueAtTime(0.0001, t1);
+
+          o1.connect(g1); g1.connect(_timerCtx.destination);
+          o2.connect(g2); g2.connect(_timerCtx.destination);
+
+          o1.start(t0); o2.start(t0);
+          o1.stop(t1);  o2.stop(t1);
+        });
+      }catch(e){}
+    }
+
+    /* =========================
+       Review words (phonograms)
+    ========================= */
+    const REVIEW_WORDS = {
+      "a": ["ant","apple","map"], "e": ["egg","ten","bed"], "i": ["ink","pin","sit"],
+      "o": ["ox","hot","mop"], "u": ["up","sun","bus"],
+      "b": ["bat","bag","bug"], "c-hard": ["cat","cup","cob"], "d": ["dog","dig","mud"],
+      "f": ["fan","fig","puff"], "g-hard": ["gap","gob","gum"], "h": ["hat","hop","hut"],
+      "j": ["jam","jug","jet"], "k": ["kit","kid","kiss"], "l": ["lip","log","bell"],
+      "m": ["map","mug","ram"], "n": ["net","nap","tin"], "p": ["pen","pig","cup"],
+      "qu": ["quit","quiz","quick"], "r": ["red","ram","rug"], "s": ["sun","sap","hiss"],
+      "t": ["tap","ten","ant"], "v": ["van","vet","give"], "w": ["win","wet","wag"],
+      "x": ["box","mix","fix"], "y": ["yam","yes","yell"], "z": ["zip","zoo","buzz"],
+      "ch": ["chip","chess","lunch"], "sh": ["ship","shop","fish"], "th": ["thin","math","path"],
+      "-ff": ["staff","cliff","sniff"], "-ll": ["bell","hill","shell"], "-ss": ["kiss","mess","class"], "-zz": ["buzz","fizz"],
+      "-ck": ["back","duck","sock"], "-tch": ["match","batch","witch"],
+      "dge": ["badge","fudge","ledge"],
+      "a-e": ["cake","late","name"], "e-e": ["these","eve","theme"], "i-e": ["kite","time","ride"],
+      "o-e": ["home","nose","stone"], "u-e": ["cube","tune","flute"],
+      "-ble": ["table","cable","fable"], "-dle": ["candle","meddle","puddle"],
+      "-ple": ["apple","purple","people"], "-tle": ["little","bottle","settle"], "-gle": ["juggle","giggle","eagle"],
+      "ar": ["car","farm","star"], "or": ["fork","corn","storm"], "ir": ["bird","stir","shirt"],
+      "er": ["her","fern","term"], "ur": ["fur","curl","turn"],
+      "y-vowel": ["my","cry","fly"],
+      "c-soft": ["cent","city","ice"], "g-soft": ["giraffe","gem","giant"],
+      "ai": ["rain","train","snail"], "ay": ["day","play","tray"],
+      "ee": ["see","tree","feet"], "ea": ["sea","bead","team"], "ea-short-e": ["bread","head","meant"],
+      "ie": ["pie","tie","field"], "ei": ["ceiling","receive","vein"], "ey": ["key","monkey","honey"],
+      "oa": ["boat","goat","road"], "ow-long-o": ["snow","slow","show"], "ow": ["cow","down","brown"],
+      "oo": ["moon","food","book"], "ue": ["blue","true","glue"], "ew": ["chew","stew","grew"], "ui": ["fruit","suit","juice"],
+      "ue-u": ["cue","due","rescue"], "ew-u": ["few","new","pew"],
+      "aw": ["saw","claw","straw"], "ou": ["out","loud","mouse"], "oi": ["coin","boil","point"], "oy": ["boy","toy","joy"],
+      "igh": ["night","light","sight"],
+      "-s": ["cats","dogs","hats"], "-es": ["boxes","wishes","dishes"],
+      "-ed": ["landed","jumped","played"], "-ing": ["running","singing","hitting"], "-ful": ["helpful","joyful","careful"],
+      "un-": ["unhappy","untie","undo"], "in-": ["inside","incomplete","indirect"],
+      "re-": ["redo","return","replay"], "dis-": ["dislike","disconnect","disagree"],
+      "-er": ["bigger","faster","taller"], "-est": ["biggest","fastest","tallest"],
+      "kn": ["knee","knife","knock"], "ng": ["song","ring","sing"], "nk": ["bank","sink","thank"],
+      "mis-": ["misread","misplace","misuse"], "pre-": ["preview","preheat","prepay"], "-less": ["hopeless","fearless","restless"]
+    };
+
+    /* =========================
+       UI refs
+    ========================= */
+    const statusBadge = document.getElementById('statusBadge');
+
+    const setupView   = document.getElementById('setupView');
+    const dashView    = document.getElementById('dashView');
+    const resultView  = document.getElementById('resultView');
+    const reviewView  = document.getElementById('reviewView');
+    const remainingView = document.getElementById('remainingView');
+
+    const modePBtn = document.getElementById('modeP');
+    const modeHBtn = document.getElementById('modeH');
+    const hfwEditor = document.getElementById('hfwEditor');
+
+    const atSelect  = document.getElementById('atSelect');
+    const cycleSel  = document.getElementById('cycleSel');
+    const sessSel   = document.getElementById('sessSel');
+    const scopeHint = document.getElementById('scopeHint');
+
+    const hfwText = document.getElementById('hfwText');
+    const hfwCountHint = document.getElementById('hfwCountHint');
+    const saveHfwBtn = document.getElementById('saveHfwBtn');
+
+    const targetInput = document.getElementById('targetInput');
+    const autoTargetBtn = document.getElementById('autoTargetBtn');
+    const targetHint = document.getElementById('targetHint');
+
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    const chartWrap = document.getElementById('chartWrap');
+    const historyHost = document.getElementById('historyHost');
+
+    // Dash
+    const timerTxt = document.getElementById('timerTxt');
+    const dashItem = document.getElementById('dashItem');
+    const dashMeta = document.getElementById('dashMeta');
+    const dashProgress = document.getElementById('dashProgress');
+
+    const kpiTarget = document.getElementById('kpiTarget');
+    const kpiCorrect = document.getElementById('kpiCorrect');
+    const kpiWrong = document.getElementById('kpiWrong');
+    const kpiAttempted = document.getElementById('kpiAttempted');
+
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn  = document.getElementById('noBtn');
+    const playBtn = document.getElementById('playBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const backSetupFromDash = document.getElementById('backSetupFromDash');
+
+    // Results
+    const summaryLine = document.getElementById('summaryLine');
+    const summaryMeta = document.getElementById('summaryMeta');
+    const correctList = document.getElementById('correctList');
+    const wrongList   = document.getElementById('wrongList');
+    const remainList  = document.getElementById('remainList');
+
+    const reviewWrongBtn = document.getElementById('reviewWrongBtn');
+    const readRemainingBtn = document.getElementById('readRemainingBtn');
+    const backSetupFromResult = document.getElementById('backSetupFromResult');
+
+    // Review
+    const reviewGrid = document.getElementById('reviewGrid');
+    const backToResultFromReview = document.getElementById('backToResultFromReview');
+    const finishReviewBtn = document.getElementById('finishReviewBtn');
+
+    // Remaining
+    const remainProg = document.getElementById('remainProg');
+    const remainItem = document.getElementById('remainItem');
+    const remainPlayBtn = document.getElementById('remainPlayBtn');
+    const remainYesBtn = document.getElementById('remainYesBtn');
+    const remainNoBtn  = document.getElementById('remainNoBtn');
+    const backToResultFromRemaining = document.getElementById('backToResultFromRemaining');
+
+    // Export / Import / Clear history
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const importFile = document.getElementById('importFile');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    const newSessionBtn = document.getElementById('newSessionBtn');
+
+    /* =========================
+       Mode
+    ========================= */
+    let MODE = 'P'; // 'P' phonograms, 'HFW' words
+
+    function setMode(m){
+      MODE = m;
+
+      // For HFW, default target should follow "total HFW taught so far"
+      if(MODE === 'HFW'){
+        targetInput.dataset.locked = '0';
+      }
+
+      modePBtn.classList.toggle('active', MODE==='P');
+      modeHBtn.classList.toggle('active', MODE==='HFW');
+      hfwEditor.style.display = (MODE==='HFW') ? 'block' : 'none';
+      rebuildAtSelect();
+      syncHfwEditor();
+      updateScopePreview(true);
+      renderChart();
+      renderHistory();
+    }
+    modePBtn.onclick = ()=> setMode('P');
+    modeHBtn.onclick = ()=> setMode('HFW');
+
+    /* =========================
+       Build Cycle / Session dropdowns
+    ========================= */
+    function buildCycleSessionSelects(){
+      cycleSel.innerHTML = '';
+      for(let c=1;c<=TOTAL_CYCLES;c++){
+        const opt = document.createElement('option');
+        opt.value = String(c);
+        opt.textContent = `Cycle ${c}`;
+        cycleSel.appendChild(opt);
+      }
+      sessSel.innerHTML = '';
+      for(let s=1;s<=SESSIONS_PER_CYCLE;s++){
+        const opt = document.createElement('option');
+        opt.value = String(s);
+        opt.textContent = `Session ${s}`;
+        sessSel.appendChild(opt);
+      }
+    }
+    buildCycleSessionSelects();
+
+    function currentSessionId(){
+      const c = parseInt(cycleSel.value||'1',10);
+      const s = parseInt(sessSel.value||'1',10);
+      return makeSessionId(c,s);
+    }
+
+    function getItemsForSession(sessionId){
+      if(MODE === 'P') return (P_MAP[sessionId] || []);
+      const arr = (HFW_DB && HFW_DB[sessionId]) ? HFW_DB[sessionId] : [];
+      return Array.isArray(arr) ? arr : [];
+    }
+
+    function rebuildAtSelect(){
+      const list = [];
+      SESSION_ORDER.forEach(id=>{
+        const items = getItemsForSession(id);
+        if(items && items.length){
+          const title = TITLE_MAP[id] ? TITLE_MAP[id].replace(/^C\d+S\d+:\s*/,'') : '';
+          list.push({ id, label: `${id}${title ? ' — '+title : ''} (${items.length})` });
+        }
+      });
+
+      atSelect.innerHTML = '';
+      if(!list.length){
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = '(No items available yet)';
+        atSelect.appendChild(opt);
+        atSelect.disabled = true;
+        return;
+      }
+      atSelect.disabled = false;
+      list.forEach(x=>{
+        const opt = document.createElement('option');
+        opt.value = x.id;
+        opt.textContent = x.label;
+        atSelect.appendChild(opt);
+      });
+
+      // keep current session if possible, otherwise pick first
+      const idNow = currentSessionId();
+      const exists = list.some(x=>x.id === idNow);
+      if(exists){
+        atSelect.value = idNow;
+      } else {
+        atSelect.value = list[0].id;
+        const p = parseSessionId(list[0].id);
+        cycleSel.value = String(p.cycle);
+        sessSel.value  = String(p.session);
+      }
+    }
+
+    function syncCycleSessionFromAt(){
+      const id = atSelect.value;
+      if(!id) return;
+      const p = parseSessionId(id);
+      if(p.cycle) cycleSel.value = String(p.cycle);
+      if(p.session) sessSel.value = String(p.session);
+    }
+    function syncAtFromCycleSession(){
+      const id = currentSessionId();
+      if(!atSelect.disabled){
+        const opt = [...atSelect.options].find(o=>o.value === id);
+        if(opt) atSelect.value = id;
+      }
+    }
+
+    atSelect.addEventListener('change', ()=>{
+      syncCycleSessionFromAt();
+      syncHfwEditor();
+      updateScopePreview(true);
+    });
+    cycleSel.addEventListener('change', ()=>{
+      syncAtFromCycleSession();
+      syncHfwEditor();
+      updateScopePreview(true);
+    });
+    sessSel.addEventListener('change', ()=>{
+      syncAtFromCycleSession();
+      syncHfwEditor();
+      updateScopePreview(true);
+    });
+
+    /* =========================
+       HFW editor per session
+    ========================= */
+    function parseWords(text){
+      return String(text||'')
+        .split(/[\n,]+/g)
+        .map(s=>s.trim())
+        .filter(Boolean);
+    }
+
+    function syncHfwEditor(){
+      if(MODE !== 'HFW') return;
+      const sid = currentSessionId();
+      const arr = (HFW_DB[sid] && Array.isArray(HFW_DB[sid])) ? HFW_DB[sid] : [];
+      hfwText.value = arr.join('\n');
+      hfwCountHint.textContent = `${arr.length} words saved for ${sid}`;
+    }
+
+    saveHfwBtn.addEventListener('click', ()=>{
+      const sid = currentSessionId();
+      const words = parseWords(hfwText.value);
+      HFW_DB[sid] = words;
+      saveHfwDb(HFW_DB);
+      hfwCountHint.textContent = `${words.length} words saved for ${sid}`;
+      status(`Saved HFW list for ${sid} (${words.length} words).`);
+      rebuildAtSelect();
+      updateScopePreview(true);
+      renderChart();
+    });
+
+    /* =========================
+       Scope builder: "Up to" current cycle/session
+       (HFW: cumulative from earlier cycles/sessions, like phonogram plumbing)
+    ========================= */
+    function uniquePreserve(arr){
+      const seen = new Set();
+      const out = [];
+      for(const x of arr){
+        const k = String(x);
+        if(seen.has(k)) continue;
+        seen.add(k);
+        out.push(x);
+      }
+      return out;
+    }
+
+    function buildScopePool(upToId){
+      const idx = SESSION_ORDER.indexOf(upToId);
+      if(idx < 0) return [];
+      const ids = SESSION_ORDER.slice(0, idx+1);
+      const items = [];
+      ids.forEach(sid=>{
+        const list = getItemsForSession(sid);
+        if(list && list.length) items.push(...list);
+      });
+      return uniquePreserve(items);
+    }
+
+    function scopeSummary(upToId, pool){
+      const title = TITLE_MAP[upToId] ? TITLE_MAP[upToId].replace(/^C\d+S\d+:\s*/,'') : '';
+      const label = `${upToId}${title ? ' — '+title : ''}`;
+      const kind = (MODE === 'P') ? 'Phonograms' : 'HFW';
+      return `Scope (${kind}): up to ${label} | Items in scope: ${pool.length}`;
+    }
+
+    function status(msg){
+      statusBadge.style.display = 'block';
+      statusBadge.textContent = msg;
+      clearTimeout(status._t);
+      status._t = setTimeout(()=>{ statusBadge.style.display='none'; }, 3500);
+    }
+
+    function updateScopePreview(autoTarget){
+      const upToId = currentSessionId();
+      const pool = buildScopePool(upToId);
+
+      scopeHint.textContent = scopeSummary(upToId, pool);
+
+      if(autoTarget){
+        if(targetInput.dataset.locked !== '1'){
+          targetInput.value = String(pool.length);
+        }
+      }
+
+      const t = parseInt(targetInput.value||'0',10);
+      targetHint.textContent = `Scope size = ${pool.length}. Target goal = ${isNaN(t)?0:t}.`;
+
+      startBtn.classList.toggle('disabled', pool.length === 0);
+      startBtn.disabled = (pool.length === 0);
+    }
+
+    targetInput.addEventListener('input', ()=>{
+      targetInput.dataset.locked = '1';
+      updateScopePreview(false);
+    });
+    autoTargetBtn.addEventListener('click', ()=>{
+      targetInput.dataset.locked = '0';
+      updateScopePreview(true);
+    });
+
+    /* =========================
+       Chart rendering (Target vs Actual) for 18 cycles × 3 sessions
+       Uses LAST record for each cycle/session and mode.
+    ========================= */
+    function getLatestByCell(mode, cycle, session){
+      const sid = makeSessionId(cycle, session);
+      const filtered = RECORDS.filter(r => r && r.mode === mode && r.at === sid);
+      if(!filtered.length) return null;
+      filtered.sort((a,b)=> (b.t||0) - (a.t||0));
+      return filtered[0];
+    }
+
+    function renderChart(){
+      const table = document.createElement('table');
+
+      const thead1 = document.createElement('tr');
+      thead1.innerHTML = `
+        <th rowspan="2" class="left">Cycle</th>
+        <th rowspan="2">Type</th>
+        <th colspan="2">Session 1</th>
+        <th colspan="2">Session 2</th>
+        <th colspan="2">Session 3</th>
+      `;
+      const thead2 = document.createElement('tr');
+      thead2.innerHTML = `
+        <th>Target</th><th>Actual</th>
+        <th>Target</th><th>Actual</th>
+        <th>Target</th><th>Actual</th>
+      `;
+
+      table.appendChild(thead1);
+      table.appendChild(thead2);
+
+      for(let c=1;c<=TOTAL_CYCLES;c++){
+        const trP = document.createElement('tr');
+        trP.innerHTML = `<td class="left" rowspan="2"><b>Cycle ${c}</b></td><td class="typeCell">P</td>`;
+        for(let s=1;s<=SESSIONS_PER_CYCLE;s++){
+          const rec = getLatestByCell('P', c, s);
+          const t = rec ? rec.target : '';
+          const a = rec ? rec.correct : '';
+          trP.innerHTML += `<td>${t!==''?t:'<span class="mutedCell">—</span>'}</td><td>${a!==''?a:'<span class="mutedCell">—</span>'}</td>`;
+        }
+
+        const trH = document.createElement('tr');
+        trH.innerHTML = `<td class="typeCell">HFW</td>`;
+        for(let s=1;s<=SESSIONS_PER_CYCLE;s++){
+          const rec = getLatestByCell('HFW', c, s);
+          const t = rec ? rec.target : '';
+          const a = rec ? rec.correct : '';
+          trH.innerHTML += `<td>${t!==''?t:'<span class="mutedCell">—</span>'}</td><td>${a!==''?a:'<span class="mutedCell">—</span>'}</td>`;
+        }
+
+        table.appendChild(trP);
+        table.appendChild(trH);
+      }
+
+      chartWrap.innerHTML = '';
+      chartWrap.appendChild(table);
+    }
+
+    /* =========================
+       History rendering
+    ========================= */
+    function fmtTime(ts){
+      const d = new Date(ts);
+      return d.toLocaleString();
+    }
+
+    function renderHistory(){
+      historyHost.innerHTML = '';
+      if(!RECORDS.length){
+        const p = document.createElement('div');
+        p.className = 'hint';
+        p.textContent = 'No records yet. Run a dash and your results will appear here.';
+        historyHost.appendChild(p);
+        return;
+      }
+
+      const list = RECORDS.slice().sort((a,b)=> (b.t||0) - (a.t||0)).slice(0, 12);
+      list.forEach(rec=>{
+        const wrap = document.createElement('div');
+        wrap.className = 'histItem';
+
+        const left = document.createElement('div');
+        const title = document.createElement('div');
+        title.innerHTML = `<b>${rec.mode === 'P' ? 'P' : 'HFW'} · ${rec.at}</b> — Target ${rec.target} · Actual ${rec.correct}`;
+        const small = document.createElement('small');
+        small.textContent = `${fmtTime(rec.t)} · Attempted ${rec.attempted}/${rec.scopeSize} · Wrong ${rec.wrong?.length||0} · Remaining ${rec.remaining?.length||0}`;
+        left.appendChild(title);
+        left.appendChild(small);
+
+        const right = document.createElement('div');
+        right.className = 'rightSide';
+
+        const btn = document.createElement('button');
+        btn.className = 'btn ghost small';
+        btn.type = 'button';
+        btn.textContent = 'View';
+        btn.onclick = ()=> showRecordDetails(rec);
+        right.appendChild(btn);
+
+        wrap.appendChild(left);
+        wrap.appendChild(right);
+        historyHost.appendChild(wrap);
+      });
+    }
+
+    function pillList(hostEl, items, cls){
+      hostEl.innerHTML = '';
+      (items || []).forEach(x=>{
+        const p = document.createElement('div');
+        p.className = `pill ${cls||'neutral'}`;
+        p.textContent = x;
+        hostEl.appendChild(p);
+      });
+    }
+
+    function showRecordDetails(rec){
+      LAST_RESULT = rec;
+      summaryLine.textContent = `${rec.mode === 'P' ? 'Phonograms' : 'HFW'} · ${rec.at} — Actual ${rec.correct} / Target ${rec.target}`;
+      summaryMeta.textContent = `Order: ${rec.order} · Attempted: ${rec.attempted}/${rec.scopeSize} · Wrong: ${rec.wrong.length} · Remaining: ${rec.remaining.length} · ${fmtTime(rec.t)}`;
+      pillList(correctList, rec.correctList, 'good');
+      pillList(wrongList, rec.wrong, 'bad');
+      pillList(remainList, rec.remaining, 'neutral');
+      switchView('result');
+    }
+
+    /* =========================
+       Views
+    ========================= */
+    function switchView(name){
+      [setupView,dashView,resultView,reviewView,remainingView].forEach(v=>v.classList.remove('active'));
+      if(name==='setup') setupView.classList.add('active');
+      if(name==='dash') dashView.classList.add('active');
+      if(name==='result') resultView.classList.add('active');
+      if(name==='review') reviewView.classList.add('active');
+      if(name==='remaining') remainingView.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    /* =========================
+       Dash state
+    ========================= */
+    const DASH_SECONDS = 60;
+    let DASH = null;
+    let tickId = 0;
+    let paused = false;
+    let pauseStartedAt = 0;
+    let totalPausedMs = 0;
+    let LAST_RESULT = null;
+
+    function mmss(sec){
+      const s = Math.max(0, sec|0);
+      const m = Math.floor(s/60);
+      const r = s % 60;
+      return String(m).padStart(2,'0') + ':' + String(r).padStart(2,'0');
+    }
+
+    function getOrder(){
+      const el = document.querySelector('input[name="order"]:checked');
+      return el ? el.value : 'sequence';
+    }
+
+    function shuffle(arr){
+      const a = arr.slice();
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]] = [a[j],a[i]];
+      }
+      return a;
+    }
+
+    function buildFeedback(rec){
+      const wrong = rec.wrong.length ? rec.wrong.join(', ') : '(none)';
+      const remaining = rec.remaining.length ? rec.remaining.join(', ') : '(none)';
+      return [
+        `OMD ${rec.mode}`,
+        `At ${rec.at}`,
+        `Target ${rec.target}`,
+        `Actual ${rec.correct}/${rec.scopeSize} (attempted ${rec.attempted})`,
+        `Wrong: ${wrong}`,
+        `Remaining: ${remaining}`
+      ].join(' | ');
+    }
+
+    function currentItem(){
+      return DASH && DASH.pool && DASH.pool[DASH.idx];
+    }
+
+    function showDashItem(){
+      const it = currentItem();
+      if(!it){
+        dashItem.textContent = '—';
+        dashProgress.textContent = '—';
+        return;
+      }
+      dashItem.textContent = it;
+      dashMeta.textContent = `${DASH.mode === 'P' ? 'Phonograms' : 'HFW'} · ${DASH.at} · Scope size ${DASH.scopeSize} · ${DASH.order === 'random' ? 'Randomised' : 'Sequence'}`;
+      dashProgress.textContent = `Item ${Math.min(DASH.idx+1, DASH.scopeSize)} of ${DASH.scopeSize}`;
+
+      if(SOUND_ON){
+        if(DASH.mode === 'P') playPhonogramSound(it);
+        else playWordSound(it);
+      }
+    }
+
+    function updateKpi(){
+      const attempted = DASH.correctList.length + DASH.wrong.length;
+      kpiTarget.textContent = String(DASH.target);
+      kpiCorrect.textContent = String(DASH.correctList.length);
+      kpiWrong.textContent = String(DASH.wrong.length);
+      kpiAttempted.textContent = String(attempted);
+    }
+
+    function stopTick(){
+      if(tickId) clearInterval(tickId);
+      tickId = 0;
+    }
+
+    function finishDash(timeUp){
+      stopTick();
+
+      // 🔔 ALWAYS ring at the end of any dash (time-up OR completed), ignoring Sound toggle
+      try{ timerBeep(); }catch(e){}
+
+      paused = false;
+      pauseBtn.textContent = 'Pause';
+
+      const attempted = DASH.correctList.length + DASH.wrong.length;
+      const remaining = DASH.pool.slice(DASH.idx);
+
+      const rec = {
+        id: 'rec_' + Math.random().toString(16).slice(2) + '_' + Date.now(),
+        t: Date.now(),
+        mode: DASH.mode,
+        at: DASH.at,
+        cycle: parseSessionId(DASH.at).cycle,
+        session: parseSessionId(DASH.at).session,
+        target: DASH.target,
+        order: DASH.order,
+        duration: DASH_SECONDS,
+        scopeSize: DASH.scopeSize,
+        attempted,
+        correct: DASH.correctList.length,
+        correctList: DASH.correctList.slice(),
+        wrong: DASH.wrong.slice(),
+        remaining: remaining.slice(),
+      };
+
+      RECORDS.push(rec);
+      saveRecords(RECORDS);
+
+      const feedback = buildFeedback(rec);
+      pushToXAPI(rec.correct, feedback);
+
+      LAST_RESULT = rec;
+      summaryLine.textContent = `${rec.mode === 'P' ? 'Phonograms' : 'HFW'} · ${rec.at} — Actual ${rec.correct} / Target ${rec.target} (${timeUp ? 'Time up' : 'Completed'})`;
+      summaryMeta.textContent = `Attempted: ${rec.attempted}/${rec.scopeSize} · Wrong: ${rec.wrong.length} · Remaining: ${rec.remaining.length} · Order: ${rec.order} · ${fmtTime(rec.t)}`;
+      pillList(correctList, rec.correctList, 'good');
+      pillList(wrongList, rec.wrong, 'bad');
+      pillList(remainList, rec.remaining, 'neutral');
+
+      renderChart();
+      renderHistory();
+      status(`Saved record: ${rec.at} · Target ${rec.target} · Actual ${rec.correct}`);
+
+      switchView('result');
+    }
+
+    function tick(){
+      if(!DASH) return;
+
+      if(paused){
+        return;
+      }
+
+      const now = Date.now();
+      const msLeft = DASH.endsAt - now;
+      const secLeft = Math.max(0, Math.ceil(msLeft/1000));
+
+      timerTxt.textContent = mmss(secLeft);
+      timerTxt.classList.toggle('soon', secLeft <= 10 && secLeft > 0);
+      timerTxt.classList.toggle('zero', secLeft === 0);
+
+      if(secLeft <= 0){
+        finishDash(true);
+      }
+    }
+
+    function startDash(){
+      // Unlock timer ring on user gesture so it can play later
+      unlockTimerBeep();
+
+      const at = currentSessionId();
+      const pool0 = buildScopePool(at);
+      if(!pool0.length){
+        alert('No items in scope yet. Choose a session that has items (or add HFW words).');
+        return;
+      }
+
+      const order = getOrder();
+      const pool = (order === 'random') ? shuffle(pool0) : pool0.slice();
+
+      let target = parseInt(targetInput.value||'0',10);
+      if(!Number.isFinite(target) || target < 0) target = pool.length;
+
+      DASH = {
+        mode: MODE,
+        at,
+        order,
+        pool,
+        scopeSize: pool.length,
+        target,
+        idx: 0,
+        correctList: [],
+        wrong: [],
+        startedAt: Date.now(),
+        endsAt: Date.now() + DASH_SECONDS*1000,
+      };
+      paused = false;
+      totalPausedMs = 0;
+      pauseStartedAt = 0;
+
+      updateKpi();
+      showDashItem();
+      timerTxt.textContent = mmss(DASH_SECONDS);
+      timerTxt.classList.remove('soon','zero');
+
+      yesBtn.disabled = false;
+      noBtn.disabled  = false;
+
+      switchView('dash');
+
+      stopTick();
+      tickId = setInterval(tick, 200);
+      tick();
+
+      statusBadge.style.display = 'block';
+      statusBadge.textContent = `${DASH.mode === 'P' ? 'P' : 'HFW'} · ${DASH.at} · Scope ${DASH.scopeSize} · Target ${DASH.target}`;
+    }
+
+    function answer(correct){
+      if(!DASH) return;
+      const it = currentItem();
+      if(!it) return;
+
+      if(correct) DASH.correctList.push(it);
+      else DASH.wrong.push(it);
+
+      DASH.idx++;
+      updateKpi();
+
+      if(DASH.idx >= DASH.scopeSize){
+        finishDash(false);
+        return;
+      }
+      showDashItem();
+    }
+
+    yesBtn.addEventListener('click', ()=> answer(true));
+    noBtn.addEventListener('click',  ()=> answer(false));
+    playBtn.addEventListener('click', ()=>{
+      if(!DASH) return;
+      const it = currentItem();
+      if(!it) return;
+      if(DASH.mode === 'P') playPhonogramSound(it);
+      else playWordSound(it);
+    });
+
+    pauseBtn.addEventListener('click', ()=>{
+      if(!DASH) return;
+      paused = !paused;
+      if(paused){
+        pauseBtn.textContent = 'Resume';
+        pauseStartedAt = Date.now();
+        status('Paused.');
+      } else {
+        pauseBtn.textContent = 'Pause';
+        const pausedMs = Date.now() - pauseStartedAt;
+        totalPausedMs += pausedMs;
+        DASH.endsAt += pausedMs;
+        status('Resumed.');
+      }
+    });
+
+    backSetupFromDash.addEventListener('click', ()=>{
+      const go = confirm('Go back to setup? This dash will be cancelled.');
+      if(!go) return;
+      stopTick();
+      DASH = null;
+      paused = false;
+      pauseBtn.textContent = 'Pause';
+      switchView('setup');
+    });
+
+    /* =========================
+       Results actions
+    ========================= */
+    backSetupFromResult.addEventListener('click', ()=> switchView('setup'));
+
+    reviewWrongBtn.addEventListener('click', ()=>{
+      if(!LAST_RESULT) return;
+      if(!LAST_RESULT.wrong || !LAST_RESULT.wrong.length){
+        alert('No wrong items to review. Great job!');
+        return;
+      }
+      openReview(LAST_RESULT);
+    });
+
+    /* =========================
+       Review view
+    ========================= */
+    function openReview(rec){
+      reviewGrid.innerHTML = '';
+
+      rec.wrong.forEach(item=>{
+        const card = document.createElement('div');
+        card.className = 'review-card';
+
+        const big = document.createElement('div');
+        big.className = 'bigItem';
+        big.textContent = item;
+
+        const row = document.createElement('div');
+        row.className = 'row-small';
+        row.style.justifyContent = 'center';
+
+        const btnMain = document.createElement('button');
+        btnMain.className = 'btn small';
+        btnMain.style.background = '#06b6d4';
+        btnMain.textContent = (rec.mode === 'P') ? '🔊 Phonogram' : '🔊 Word';
+        btnMain.onclick = ()=>{
+          if(rec.mode === 'P') playPhonogramSound(item);
+          else playWordSound(item);
+        };
+
+        row.appendChild(btnMain);
+
+        const wordsWrap = document.createElement('div');
+        if(rec.mode === 'P'){
+          const words = REVIEW_WORDS[item] || [];
+          if(words.length){
+            const wordsRow = document.createElement('div');
+            wordsRow.className = 'row-small';
+            wordsRow.style.justifyContent = 'center';
+            words.forEach(w=>{
+              const wb = document.createElement('button');
+              wb.className = 'btn ghost small';
+              wb.textContent = `🔊 ${w}`;
+              wb.onclick = ()=> playWordSound(w);
+              wordsRow.appendChild(wb);
+            });
+            wordsWrap.appendChild(wordsRow);
+          } else {
+            const none = document.createElement('div');
+            none.className = 'hint';
+            none.textContent = 'No example words available';
+            wordsWrap.appendChild(none);
+          }
+        } else {
+          const note = document.createElement('div');
+          note.className = 'hint';
+          note.textContent = 'HFW Visual Drill: practise reading this word clearly and quickly.';
+          wordsWrap.appendChild(note);
+        }
+
+        const markBtn = document.createElement('button');
+        markBtn.className = 'btn ok small';
+        markBtn.textContent = '✓ Mark as reviewed';
+        markBtn.onclick = ()=>{ markBtn.disabled = true; markBtn.textContent = 'Reviewed'; };
+
+        card.appendChild(big);
+        card.appendChild(row);
+        card.appendChild(wordsWrap);
+        card.appendChild(markBtn);
+
+        reviewGrid.appendChild(card);
+      });
+
+      switchView('review');
+    }
+
+    backToResultFromReview.addEventListener('click', ()=> switchView('result'));
+    finishReviewBtn.addEventListener('click', ()=>{
+      alert('Review completed. You can continue with remaining items or start a new dash.');
+      switchView('result');
+    });
+
+    /* =========================
+       Remaining (untimed) reading
+    ========================= */
+    let REMAIN = null;
+
+    function startRemaining(rec){
+      const list = (rec && rec.remaining) ? rec.remaining.slice() : [];
+      if(!list.length){
+        alert('No remaining items. Well done!');
+        return;
+      }
+      REMAIN = {
+        mode: rec.mode,
+        at: rec.at,
+        list,
+        idx: 0,
+        extraWrong: []
+      };
+      showRemainingItem();
+      switchView('remaining');
+    }
+
+    function showRemainingItem(){
+      const it = REMAIN.list[REMAIN.idx];
+      remainItem.textContent = it || '—';
+      remainProg.textContent = `Item ${Math.min(REMAIN.idx+1, REMAIN.list.length)} / ${REMAIN.list.length}`;
+      if(SOUND_ON && it){
+        if(REMAIN.mode === 'P') playPhonogramSound(it);
+        else playWordSound(it);
+      }
+    }
+
+    function remainNext(markWrong){
+      const it = REMAIN.list[REMAIN.idx];
+      if(it && markWrong) REMAIN.extraWrong.push(it);
+      REMAIN.idx++;
+      if(REMAIN.idx >= REMAIN.list.length){
+        const msg = REMAIN.extraWrong.length
+          ? `Done. Extra wrong items during remaining: ${REMAIN.extraWrong.join(', ')}`
+          : 'Done. No extra wrong items during remaining.';
+        alert(msg);
+        switchView('result');
+        return;
+      }
+      showRemainingItem();
+    }
+
+    readRemainingBtn.addEventListener('click', ()=>{
+      if(!LAST_RESULT) return;
+      startRemaining(LAST_RESULT);
+    });
+
+    remainPlayBtn.addEventListener('click', ()=>{
+      if(!REMAIN) return;
+      const it = REMAIN.list[REMAIN.idx];
+      if(!it) return;
+      if(REMAIN.mode === 'P') playPhonogramSound(it);
+      else playWordSound(it);
+    });
+
+    remainYesBtn.addEventListener('click', ()=> remainNext(false));
+    remainNoBtn.addEventListener('click', ()=> remainNext(true));
+    backToResultFromRemaining.addEventListener('click', ()=> switchView('result'));
+
+    /* =========================
+       Export / Import / Clear history
+    ========================= */
+    function downloadJSON(obj, filename){
+      const blob = new Blob([JSON.stringify(obj, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    exportBtn.addEventListener('click', ()=>{
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        records: RECORDS,
+        hfwDb: HFW_DB
+      };
+      downloadJSON(payload, `one-minute-dash-records-${Date.now()}.json`);
+    });
+
+    importBtn.addEventListener('click', ()=> importFile.click());
+
+    importFile.addEventListener('change', async ()=>{
+      const file = importFile.files && importFile.files[0];
+      importFile.value = '';
+      if(!file) return;
+
+      try{
+        const text = await file.text();
+        const obj = JSON.parse(text);
+
+        const incomingRecords = Array.isArray(obj.records) ? obj.records : [];
+        const incomingHfw = (obj.hfwDb && typeof obj.hfwDb === 'object') ? obj.hfwDb : {};
+
+        const byId = new Map(RECORDS.map(r=> [r.id, r]));
+        incomingRecords.forEach(r=>{
+          if(r && r.id) byId.set(r.id, r);
+          else RECORDS.push(r);
+        });
+        RECORDS = Array.from(byId.values()).filter(Boolean);
+        saveRecords(RECORDS);
+
+        HFW_DB = { ...(HFW_DB||{}), ...(incomingHfw||{}) };
+        saveHfwDb(HFW_DB);
+
+        status('Imported JSON successfully.');
+        rebuildAtSelect();
+        syncHfwEditor();
+        updateScopePreview(true);
+        renderChart();
+        renderHistory();
+      }catch(e){
+        alert('Import failed. Please ensure this is a valid JSON exported from One Minute Dash.');
+      }
+    });
+
+    clearHistoryBtn.addEventListener('click', ()=>{
+      const ok = confirm('Clear ALL One Minute Dash records (history) on this browser? This cannot be undone.\n\nTip: Download JSON first if you want backup.');
+      if(!ok) return;
+      RECORDS = [];
+      saveRecords(RECORDS);
+      status('History cleared.');
+      renderChart();
+      renderHistory();
+    });
+
+    /* Reset selection */
+    resetBtn.addEventListener('click', ()=>{
+      const ok = confirm('Reset target lock and refresh scope preview?');
+      if(!ok) return;
+      targetInput.dataset.locked = '0';
+      updateScopePreview(true);
+    });
+
+    /* =========================
+       New session (SLS attempt clear)
+       (Does NOT wipe OMD history on purpose.)
+    ========================= */
+    newSessionBtn.addEventListener('click', ()=>{
+      try{
+        pushToXAPI(0, '');
+        status('SLS attempt cleared (score/feedback set to 0). OMD history kept.');
+      }catch(e){}
+    });
+
+    /* =========================
+       Start button
+    ========================= */
+    startBtn.addEventListener('click', startDash);
+
+    /* =========================
+       Init
+    ========================= */
+    function init(){
+      rebuildAtSelect();
+      syncCycleSessionFromAt();
+      syncHfwEditor();
+      updateScopePreview(true);
+      renderChart();
+      renderHistory();
+    }
+    init();
+
+    /* Initialize New-Session Clear Kit */
+    window.addEventListener('load', () => {
+      NewSessionClearKit.init({
+        activityId: window.ACTIVITY_ID,
+        clickButtonId: 'newSessionBtn',
+        pushZero: false
+      });
+    });
+  })();
+  </script>
+</body>
+</html>
