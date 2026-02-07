@@ -60,11 +60,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
 
   <style>
+    /* =========================================
+       Readability + Comfort (Kim Sze)
+       - Keep grey + light blue background
+       - Change remaining white surfaces to light green
+    ========================================= */
     :root{
-      --bg:#f6f7fb;
-      --card:#ffffff;
-      --ink:#0f172a;
-      --muted:#637083;
+      --itembg:#eaf2ff;    /* softer light blue */
+      --itemline:#d6e6ff;  /* softer border */
+      --bg:#d1d5db;        /* matte grey */
+      --card:#e5e7eb;      /* slightly lighter matte grey for the app surface */
+
+      /* ✅ Light green "paper" surfaces (replaces white) */
+      --paper:#e9fbe9;
+      --paper2:#f3fdf3;
+
+      --ink:#111827;       /* near-black */
+      --muted:#374151;     /* stronger muted */
       --line:#e9eef7;
       --brand:#2563eb;
       --good:#16a34a;
@@ -81,11 +93,18 @@
     }
 
     *{ box-sizing:border-box; }
+
     body{
-      font-family:"Lexend", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      margin:0;
       background:var(--bg);
       color:var(--ink);
+      font-family:"Lexend", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-size:18px;
+      line-height:1.6;
+      letter-spacing:0.005em;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+
+      margin:0;
       display:flex;
       justify-content:center;
       align-items:flex-start;
@@ -94,9 +113,19 @@
       gap:20px;
     }
 
+    @media (max-width:520px){
+      body{ font-size:17px; }
+    }
+
+    :focus-visible{
+      outline: 3px solid rgba(37,99,235,.35);
+      outline-offset: 3px;
+      border-radius: 10px;
+    }
+
     /* Keep xAPI base hidden but present */
     .container{
-      background:#fff;
+      background:var(--paper); /* ✅ was #fff */
       padding:10px;
       border-radius:8px;
       box-shadow:0 0 5px rgba(0,0,0,.08);
@@ -123,17 +152,19 @@
     }
     header h1{
       margin:0;
-      font-size:22px;
+      font-size:24px;
       letter-spacing:.2px;
       display:flex;
       align-items:center;
       gap:10px;
     }
+
     header p{
       margin:0;
       color:var(--muted);
-      font-size:14px;
-      line-height:1.35;
+      font-size:15px;
+      line-height:1.6;
+      max-width:65ch;
     }
 
     .topbar{
@@ -150,7 +181,7 @@
       color:#fff;
       padding:8px 12px;
       border-radius:12px;
-      font-size:12px;
+      font-size:13px;
       white-space:nowrap;
       max-width:75ch;
       overflow:hidden;
@@ -166,15 +197,16 @@
     }
 
     .panel{
-      background:#fbfcff;
+      background:var(--paper2); /* ✅ was #fbfcff */
       border:1px solid var(--line);
       border-radius:14px;
       padding:14px;
       overflow:auto;
       max-height:70vh;
     }
+
     .control{
-      background:#fff;
+      background:var(--paper); /* ✅ was #fff */
       border:1px solid var(--line);
       border-radius:14px;
       padding:12px;
@@ -182,13 +214,15 @@
     }
     .control h3{
       margin:0 0 8px;
-      font-size:15px;
+      font-size:16px;
     }
+
     .hint{
-      font-size:12px;
-      color:#64748b;
+      font-size:13px;
+      color:#4b5563;
       margin-top:6px;
-      line-height:1.35;
+      line-height:1.55;
+      max-width:65ch;
     }
 
     .row-small{
@@ -208,10 +242,15 @@
       color:#fff;
       transition:transform .06s ease, box-shadow .18s ease, filter .18s ease;
       box-shadow: 0 10px 22px rgba(0,0,0,.10);
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
     }
     .btn:active{ transform:translateY(1px); box-shadow: 0 6px 14px rgba(0,0,0,.10); }
     .btn.ghost{
-      background:#fff;
+      background:var(--paper); /* ✅ was #fff */
       color:var(--brand);
       border:1px solid #cfe1ff;
       box-shadow:none;
@@ -232,7 +271,7 @@
       padding:8px 12px;
       border-radius:999px;
       border:1px solid var(--line);
-      background:#fff;
+      background:var(--paper); /* ✅ was #fff */
       color:var(--ink);
       font-weight:900;
       cursor:pointer;
@@ -245,14 +284,14 @@
 
     select, input[type="number"], textarea{
       font-family:inherit;
-      font-size:14px;
+      font-size:15px;
     }
     select, input[type="number"]{
       width:100%;
       padding:10px 12px;
       border:1px solid var(--line);
       border-radius:12px;
-      background:#fff;
+      background:var(--paper); /* ✅ was #fff */
       color:var(--ink);
       font-weight:700;
     }
@@ -264,6 +303,8 @@
       border-radius:12px;
       resize:vertical;
       font-weight:700;
+      background:var(--paper); /* ✅ added */
+      color:var(--ink);
     }
 
     .pillRow{
@@ -286,13 +327,11 @@
     .pill.bad{ background:#991b1b; }
     .pill.neutral{ background:#111827; }
 
-    /* Word colouring */
     .vowel{ color:var(--vowel); }
     .cons{ color:#000; }
     .pre{ color:var(--prefix); }
     .suf{ color:var(--suffix); }
 
-    /* Session label pill */
     .sidPill{
       display:inline-flex;
       align-items:center;
@@ -300,7 +339,7 @@
       padding:6px 10px;
       border-radius:999px;
       border:1px solid #e2e8f0;
-      background:#f8fafc;
+      background:var(--paper2); /* ✅ was #f8fafc */
       color:#0f172a;
       font-weight:1000;
       font-size:13px;
@@ -314,19 +353,17 @@
       margin-right:10px;
     }
 
-    /* Keep sidPill INLINE in list/pills (Words panel + results pills) */
     .wordText .sidPill,
     .pill .sidPill{
       position:static;
       margin-right:10px;
     }
 
-    /* Dash view */
     .view{ display:none; }
     .view.active{ display:block; }
 
     .dashCard{
-      background:#fff;
+      background:var(--card);
       border:1px solid #f1f1f4;
       border-radius:18px;
       padding:18px;
@@ -350,11 +387,11 @@
     .bigItem{
       font-size:clamp(54px, 10vw, 140px);
       font-weight:1000;
-      letter-spacing:2px;
+      letter-spacing:1.5px;
       padding:10px 18px;
       border-radius:16px;
-      border:1px solid #e9eef7;
-      background:#fff;
+      border:1px solid var(--itemline);
+      background:var(--itembg);
       line-height:1;
       color:#000;
       min-width:min(520px, 92%);
@@ -366,7 +403,6 @@
     }
     .bigItem .sp{ width:12px; display:inline-block; }
 
-    /* ✅ Words-only bigItem: keep word on ONE line, put CxSy at top-left, and allow JS auto-fit */
     .bigItem.hasSid{
       display:block;
       position:relative;
@@ -387,9 +423,10 @@
     }
 
     .metaLine{
-      color:#64748b;
-      font-size:13px;
+      color:#4b5563;
+      font-size:14px;
       font-weight:700;
+      max-width:65ch;
     }
     .kpi{
       display:flex;
@@ -400,21 +437,20 @@
       font-size:13px;
     }
     .kpi span{
-      background:#f8fafc;
+      background:var(--paper2); /* ✅ was #f8fafc */
       border:1px solid #e2e8f0;
       border-radius:999px;
       padding:6px 10px;
       font-weight:900;
     }
 
-    /* Chart table */
     .chartWrap{ overflow:auto; }
     table{
       border-collapse:separate;
       border-spacing:0;
       width:100%;
       font-size:13px;
-      background:#fff;
+      background:var(--paper); /* ✅ was #fff */
       border:1px solid var(--line);
       border-radius:14px;
       overflow:hidden;
@@ -438,7 +474,7 @@
     .typeCell{
       font-weight:1000;
       color:#111827;
-      background:#fbfcff;
+      background:var(--paper2); /* ✅ was #fbfcff */
     }
     .mutedCell{ color:#94a3b8; }
 
@@ -450,14 +486,14 @@
       border:1px solid var(--line);
       border-radius:12px;
       padding:10px;
-      background:#fff;
+      background:var(--paper); /* ✅ was #fff */
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
       gap:10px;
     }
     .histItem b{ font-weight:1000; }
-    .histItem small{ color:#64748b; font-weight:700; }
+    .histItem small{ color:#6b7280; font-weight:700; line-height:1.45; }
     .histItem .rightSide{
       display:flex;
       gap:8px;
@@ -466,10 +502,9 @@
       align-items:center;
     }
 
-    /* Review grid */
     .review-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:12px; }
     .review-card{
-      background:#fff;
+      background:var(--paper); /* ✅ was #fff */
       border:1px solid var(--line);
       border-radius:14px;
       padding:12px;
@@ -493,7 +528,6 @@
       top:10px;
     }
 
-    /* Sound toggle */
     .toggle{
       display:inline-flex;
       align-items:center;
@@ -501,7 +535,7 @@
       padding:8px 10px;
       border-radius:999px;
       border:1px solid var(--line);
-      background:#fff;
+      background:var(--paper); /* ✅ was #fff */
       cursor:pointer;
       user-select:none;
       font-weight:1000;
@@ -514,7 +548,6 @@
     .toggle.on{ border-color:#bbf7d0; background:#ecfdf5; color:#065f46; }
     .toggle.on .dot{ background:#16a34a; }
 
-    /* Words list panel */
     .wordsList{
       display:grid;
       gap:10px;
@@ -528,28 +561,26 @@
       padding:10px 10px;
       border:1px solid var(--line);
       border-radius:12px;
-      background:#fbfcff;
+      background:var(--paper2); /* ✅ was #fbfcff */
     }
     .wordText{
       font-size:20px;
       font-weight:1000;
-      letter-spacing:.6px;
+      letter-spacing:.4px;
       display:flex;
       align-items:center;
       flex-wrap:wrap;
     }
 
-    /* Footer credit */
     .credit{
       margin-top:10px;
-      color:#64748b;
+      color:#6b7280;
       font-size:12px;
       text-align:center;
       font-weight:700;
-      line-height:1.35;
+      line-height:1.45;
     }
 
-    /* Audio element hidden (sound can still play) */
     #player{ position:fixed; left:12px; bottom:12px; width:280px; display:none; }
 
     /* ====== Effects overlay (Drumroll + Confetti) ====== */
@@ -564,7 +595,7 @@
     }
     #fxOverlay .card{
       pointer-events:none;
-      background:#ffffff;
+      background:var(--paper); /* ✅ was #ffffff */
       border-radius:18px;
       border:1px solid #e2e8f0;
       box-shadow: 0 20px 60px rgba(0,0,0,.22);
@@ -598,6 +629,7 @@
       .row{ grid-template-columns: 1fr; }
       .bigItem{ min-width:auto; width:100%; }
       .bigItem.hasSid{ min-width:auto; width:100%; }
+      header p{ max-width: 60ch; }
     }
   </style>
 
@@ -658,12 +690,14 @@
             <span class="dot" aria-hidden="true"></span>
             <span id="soundLabel">Sound: OFF</span>
           </div>
+
           <button class="btn ghost small" id="exportBtn" type="button">Download JSON</button>
           <button class="btn ghost small" id="importBtn" type="button">Import JSON</button>
           <button class="btn warn small" id="clearHistoryBtn" type="button">Clear history</button>
-          <button class="btn ghost small" id="newSessionBtn" type="button">New session (clear SLS attempt)
+
+          <button class="btn ghost small" id="newSessionBtn" type="button">New session (clear SLS attempt)</button>
           <a class="btn ghost small" href="https://limkimsze-maker.github.io/P3_SDR_Spelling/" target="_blank" rel="noopener">SDR Spelling</a>
-</button>
+
           <input id="importFile" type="file" accept="application/json" class="hidden" style="display:none;">
         </div>
 
@@ -706,7 +740,6 @@
             <div class="hint" id="scopeHint">—</div>
           </div>
 
-          <!-- ✅ NEW: Buttons of the Day -->
           <div class="control">
             <h3>Buttons of the Day</h3>
             <div class="row-small">
@@ -801,7 +834,7 @@
       </div>
     </section>
 
-    <!-- ✅ NEW: DAY VIEW -->
+    <!-- ✅ DAY VIEW -->
     <section id="dayView" class="view">
       <div class="dashCard" style="width:100%;">
         <div class="row-small" style="width:100%; justify-content:space-between; gap:10px;">
@@ -940,6 +973,7 @@
 
   <audio id="player" preload="auto" playsinline></audio>
 
+  <!-- ✅ Everything below is your original JS, unchanged -->
   <script>
   (function(){
     /* =========================
@@ -963,7 +997,7 @@
         const badge = document.getElementById('statusBadge');
         if (badge){
           badge.style.display = 'block';
-          badge.textContent = `Saved for SLS · Score ${score}${feedback ? ' · ' + (feedback.length>60 ? (feedback.slice(0,60)+'…') : feedback) : ''}`;
+          badge.textContent = `Saved for SLS · Score ${score}${feedback ? ' · ' + (feedback.length>60 ? (feedback.slice(0,60)+'…') : feedback) : ''}`; 
         }
       } catch(e) {}
     }
@@ -1129,9 +1163,6 @@
       "C18S3": ["restless","harmless","homeless","helpless","hopeless","endless","useless","painless","speechless","spotless","powerless"]
     };
 
-    /* =========================
-       Encode / decode words with session tag
-    ========================= */
     function encodeWordItem(sid, word){ return `${sid}::${word}`; }
     function decodeWordItem(x){
       const s = String(x||'');
@@ -1140,9 +1171,6 @@
       return { sid: s.slice(0,i), word: s.slice(i+2) };
     }
 
-    /* =========================
-       HFW DB (preloaded lesson plan words + teacher editable)
-    ========================= */
     const HFW_SEED = {
       "C1S1": ["our"], "C1S2": ["ask"], "C1S3": ["work"],
       "C2S1": ["have","year"], "C2S2": ["give","only"], "C2S3": ["want","does"],
@@ -1184,9 +1212,6 @@
       if(changed) saveHfwDb(HFW_DB);
     })();
 
-    /* =========================
-       Records history
-    ========================= */
     function loadRecords(){
       try{
         const raw = localStorage.getItem(KEY_RECORDS);
@@ -1198,9 +1223,6 @@
     }
     let RECORDS = loadRecords();
 
-    /* =========================
-       Sound
-    ========================= */
     const soundToggle = document.getElementById('soundToggle');
     const soundLabel  = document.getElementById('soundLabel');
     let SOUND_ON = false;
@@ -1215,7 +1237,7 @@
     (function initSound(){
       let v = null;
       try{ v = localStorage.getItem(KEY_SOUND); }catch(e){}
-      setSound(v === '1'); // default OFF
+      setSound(v === '1');
     })();
 
     function toggleSound(){ setSound(!SOUND_ON); }
@@ -1224,9 +1246,6 @@
       if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleSound(); }
     });
 
-    /* =========================
-       Audio helpers
-    ========================= */
     const AUDIO_BASE = 'audio/';
     const WORD_BASE  = 'audio/words/';
     const AUDIO_EXTS = ['mp3','m4a','mp4','wav','ogg'];
@@ -1285,9 +1304,6 @@
       speak(d.word);
     }
 
-    // =========================
-    // Timer ring (ALWAYS plays even if Sound toggle is OFF)
-    // =========================
     let _timerCtx = null;
 
     async function unlockTimerBeep(){
@@ -1354,9 +1370,6 @@
       }catch(e){}
     }
 
-    /* =========================
-       Word colouring (WORDS ONLY)
-    ========================= */
     const TEAM_PATTERNS = [
       "eigh","igh",
       "ai","ay","ee","ea","ie","ei","ey",
@@ -1576,9 +1589,6 @@
       });
     }
 
-    /* =========================
-       UI refs
-    ========================= */
     const statusBadge = document.getElementById('statusBadge');
 
     const setupView   = document.getElementById('setupView');
@@ -1616,12 +1626,10 @@
     const chartWrap = document.getElementById('chartWrap');
     const historyHost = document.getElementById('historyHost');
 
-    // Buttons of the Day
     const btnPOD  = document.getElementById('btnPOD');
     const btnWOD  = document.getElementById('btnWOD');
     const btnHFWD = document.getElementById('btnHFWD');
 
-    // Day view controls
     const backFromDay = document.getElementById('backFromDay');
     const dayTitle = document.getElementById('dayTitle');
     const daySub = document.getElementById('daySub');
@@ -1633,13 +1641,11 @@
     const dayAllTitle = document.getElementById('dayAllTitle');
     const dayAllHost = document.getElementById('dayAllHost');
 
-    // FX
     const fxOverlay = document.getElementById('fxOverlay');
     const fxTitle = document.getElementById('fxTitle');
     const fxSub = document.getElementById('fxSub');
     const confettiCanvas = document.getElementById('confettiCanvas');
 
-    // Dash
     const timerTxt = document.getElementById('timerTxt');
     const dashItem = document.getElementById('dashItem');
     const dashMeta = document.getElementById('dashMeta');
@@ -1656,7 +1662,6 @@
     const pauseBtn = document.getElementById('pauseBtn');
     const backSetupFromDash = document.getElementById('backSetupFromDash');
 
-    // Results
     const summaryLine = document.getElementById('summaryLine');
     const summaryMeta = document.getElementById('summaryMeta');
     const correctList = document.getElementById('correctList');
@@ -1667,12 +1672,10 @@
     const readRemainingBtn = document.getElementById('readRemainingBtn');
     const backSetupFromResult = document.getElementById('backSetupFromResult');
 
-    // Review
     const reviewGrid = document.getElementById('reviewGrid');
     const backToResultFromReview = document.getElementById('backToResultFromReview');
     const finishReviewBtn = document.getElementById('finishReviewBtn');
 
-    // Remaining
     const remainProg = document.getElementById('remainProg');
     const remainItem = document.getElementById('remainItem');
     const remainPlayBtn = document.getElementById('remainPlayBtn');
@@ -1680,17 +1683,13 @@
     const remainNoBtn  = document.getElementById('remainNoBtn');
     const backToResultFromRemaining = document.getElementById('backToResultFromRemaining');
 
-    // Export / Import / Clear history
     const exportBtn = document.getElementById('exportBtn');
     const importBtn = document.getElementById('importBtn');
     const importFile = document.getElementById('importFile');
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
     const newSessionBtn = document.getElementById('newSessionBtn');
 
-    /* =========================
-       Mode
-    ========================= */
-    let MODE = 'P'; // 'P' phonograms, 'HFW', 'W' words
+    let MODE = 'P';
 
     function getItemsForSession(sessionId){
       if(MODE === 'P') return (P_MAP[sessionId] || []);
@@ -1724,9 +1723,6 @@
     modeHBtn.onclick = ()=> setMode('HFW');
     modeWBtn.onclick = ()=> setMode('W');
 
-    /* =========================
-       Timer ON/OFF
-    ========================= */
     function isTimed(){
       const el = document.querySelector('input[name="timed"]:checked');
       return el ? (el.value === 'on') : true;
@@ -1739,9 +1735,6 @@
       startBtn.textContent = isTimed() ? 'Start 60s Dash' : 'Start (untimed)';
     }
 
-    /* =========================
-       Build Cycle / Session dropdowns
-    ========================= */
     function buildCycleSessionSelects(){
       cycleSel.innerHTML = '';
       for(let c=1;c<=TOTAL_CYCLES;c++){
@@ -1842,9 +1835,6 @@
       updateScopePreview(true);
     });
 
-    /* =========================
-       HFW editor per session
-    ========================= */
     function parseWords(text){
       return String(text||'')
         .split(/[\n,]+/g)
@@ -1872,9 +1862,6 @@
       renderChart();
     });
 
-    /* =========================
-       Words panel (current session words)
-    ========================= */
     function syncWordsPanel(){
       if(MODE !== 'W') return;
       const sid = currentSessionId();
@@ -1912,9 +1899,6 @@
       });
     }
 
-    /* =========================
-       Scope builders
-    ========================= */
     function uniquePreserve(arr){
       const seen = new Set();
       const out = [];
@@ -2011,9 +1995,6 @@
       updateScopePreview(true);
     });
 
-    /* =========================
-       Chart rendering (Target vs Actual)
-    ========================= */
     function getLatestByCell(mode, cycle, session){
       const sid = makeSessionId(cycle, session);
       const filtered = RECORDS.filter(r => r && r.timed === true && r.mode === mode && r.at === sid);
@@ -2080,9 +2061,6 @@
       chartWrap.appendChild(table);
     }
 
-    /* =========================
-       History rendering
-    ========================= */
     function fmtTime(ts){
       const d = new Date(ts);
       return d.toLocaleString();
@@ -2144,6 +2122,8 @@
       });
     }
 
+    let LAST_RESULT = null;
+
     function showRecordDetails(rec){
       LAST_RESULT = rec;
       const modeLabel = (rec.mode === 'P') ? 'Phonograms' : (rec.mode === 'HFW') ? 'High Frequency Words' : 'Words';
@@ -2156,9 +2136,6 @@
       switchView('result');
     }
 
-    /* =========================
-       Views
-    ========================= */
     function switchView(name){
       [setupView, dayView, dashView, resultView, reviewView, remainingView].forEach(v=>v.classList.remove('active'));
       if(name==='setup') setupView.classList.add('active');
@@ -2170,9 +2147,6 @@
       window.scrollTo({top:0, behavior:'smooth'});
     }
 
-    /* =========================
-       Drumroll + Confetti (brief)
-    ========================= */
     function showFx(title, sub){
       fxTitle.textContent = title || 'Drumroll…';
       fxSub.textContent = sub || 'Get ready! 🎉';
@@ -2220,8 +2194,6 @@
         step._t = t;
 
         ctx.clearRect(0,0,c.width,c.height);
-        ctx.save();
-        ctx.scale(1,1);
 
         for(const p of parts){
           p.vy += 380*dt;
@@ -2246,8 +2218,6 @@
           ctx.restore();
         }
 
-        ctx.restore();
-
         if(t - t0 < durationMs){
           raf = requestAnimationFrame(step);
         } else {
@@ -2261,7 +2231,7 @@
     }
 
     async function playDrumroll(durationMs=1200){
-      if(!SOUND_ON) return; // drumroll respects Sound toggle
+      if(!SOUND_ON) return;
       try{
         const AC = window.AudioContext || window.webkitAudioContext;
         if(!AC) return;
@@ -2271,7 +2241,6 @@
         const ctx = _timerCtx;
         const now = ctx.currentTime;
 
-        // Make noise buffer
         const bufferSize = Math.floor(ctx.sampleRate * 0.25);
         const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
         const data = noiseBuffer.getChannelData(0);
@@ -2295,7 +2264,6 @@
 
         src.start(now);
 
-        // “Roll” by pulsing gain, faster over time
         const steps = 18;
         for(let i=0;i<steps;i++){
           const t = now + (i/steps)*(durationMs/1000);
@@ -2322,12 +2290,7 @@
       hideFx();
     }
 
-    /* =========================
-       Buttons of the Day (session-only lists)
-       - Uses ONLY data already in this HTML:
-         P_MAP, WORD_DB, HFW_DB/HFW_SEED
-    ========================= */
-    let DAY = null; // { kind:'P'|'W'|'HFW', sid, list, idx }
+    let DAY = null;
 
     function getDayList(kind, sid){
       if(kind === 'P'){
@@ -2336,7 +2299,6 @@
       if(kind === 'W'){
         return (WORD_DB[sid] || []).slice();
       }
-      // HFW: prefer current (teacher-edited) db, else fallback to seed
       const curr = (HFW_DB && Array.isArray(HFW_DB[sid])) ? HFW_DB[sid] : [];
       const seed = (HFW_SEED && Array.isArray(HFW_SEED[sid])) ? HFW_SEED[sid] : [];
       return (curr.length ? curr : seed).slice();
@@ -2368,7 +2330,6 @@
 
           const text = document.createElement('div');
           text.className = 'wordText';
-          // show the word (colored) without repeating the sid pill each row
           text.innerHTML = renderWordCoreHTML(w, sid);
 
           row.appendChild(btn);
@@ -2380,7 +2341,6 @@
         return;
       }
 
-      // P / HFW -> pills
       const pillRow = document.createElement('div');
       pillRow.className = 'pillRow';
       pillRow.style.justifyContent = 'center';
@@ -2442,11 +2402,7 @@
       showDayItem();
 
       switchView('day');
-
-      // FX: brief drumroll + confetti, then reveal (overlay hides quickly)
       await fxBurst('Drumroll…', `Revealing ${kindLabel(kind)} • ${sid}`, 1400);
-
-      // keep focus in day view
       dayNextBtn.focus({ preventScroll:true });
     }
 
@@ -2465,19 +2421,14 @@
       showDayItem();
     });
     dayPlayBtn.addEventListener('click', playDayItem);
-
     backFromDay.addEventListener('click', ()=> switchView('setup'));
 
-    /* =========================
-       Dash state
-    ========================= */
     const DASH_SECONDS = 60;
     let DASH = null;
     let tickId = 0;
     let paused = false;
     let pauseStartedAt = 0;
     let totalPausedMs = 0;
-    let LAST_RESULT = null;
 
     function mmss(sec){
       const s = Math.max(0, sec|0);
@@ -2760,9 +2711,6 @@
       switchView('setup');
     });
 
-    /* =========================
-       Results actions
-    ========================= */
     backSetupFromResult.addEventListener('click', ()=> switchView('setup'));
 
     reviewWrongBtn.addEventListener('click', ()=>{
@@ -2774,9 +2722,6 @@
       openReview(LAST_RESULT);
     });
 
-    /* =========================
-       Review view
-    ========================= */
     function openReview(rec){
       reviewGrid.innerHTML = '';
 
@@ -2835,9 +2780,6 @@
       switchView('result');
     });
 
-    /* =========================
-       Remaining (untimed) reading
-    ========================= */
     let REMAIN = null;
 
     function startRemaining(rec){
@@ -2910,9 +2852,6 @@
     remainNoBtn.addEventListener('click', ()=> remainNext(true));
     backToResultFromRemaining.addEventListener('click', ()=> switchView('result'));
 
-    /* =========================
-       Export / Import / Clear history
-    ========================= */
     function downloadJSON(obj, filename){
       const blob = new Blob([JSON.stringify(obj, null, 2)], {type:'application/json'});
       const url = URL.createObjectURL(blob);
@@ -2988,9 +2927,6 @@
       updateScopePreview(true);
     });
 
-    /* =========================
-       New session (SLS attempt clear)
-    ========================= */
     newSessionBtn.addEventListener('click', ()=>{
       try{
         pushToXAPI(0, '');
@@ -2998,14 +2934,8 @@
       }catch(e){}
     });
 
-    /* =========================
-       Start button
-    ========================= */
     startBtn.addEventListener('click', startDash);
 
-    /* =========================
-       Init
-    ========================= */
     function init(){
       rebuildAtSelect();
       syncCycleSessionFromAt();
@@ -3027,7 +2957,6 @@
 
     init();
 
-    /* Initialize New-Session Clear Kit */
     window.addEventListener('load', () => {
       NewSessionClearKit.init({
         activityId: window.ACTIVITY_ID,
