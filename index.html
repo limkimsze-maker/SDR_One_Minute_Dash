@@ -2049,10 +2049,11 @@ function clearAllOverrides(){
       updateStartButtonLabel();
     }
 
-    targetInput.('input', ()=>{
-      targetInput.dataset.locked = '1';
-      updateScopePreview(false);
-    });
+    targetInput.addEventListener('input', ()=>{
+  targetInput.dataset.locked = '1';
+  updateScopePreview(false);
+});
+
     autoTargetBtn.addEventListener('click', ()=>{
       targetInput.dataset.locked = '0';
       updateScopePreview(true);
@@ -3138,4 +3139,5 @@ if(clearOverridesBtn){
   </script>
 </body>
 </html>
+
 
