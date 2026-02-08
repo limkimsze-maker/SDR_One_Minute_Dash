@@ -823,8 +823,18 @@
         </section>
 
         <section class="panel">
-          <h3 style="margin:4px 0 10px;">P3 SDR One Minute Dash Chart (Timed only — Target vs Actual)</h3>
-          <div class="chartWrap" id="chartWrap"></div>
+         <h3 style="margin:4px 0 10px;">P3 SDR One Minute Dash Chart (Timed only — Target vs Actual)</h3>
+
+<div class="row-small" style="justify-content:space-between; margin:0 0 10px;">
+  <div class="hint" id="chartLockHint" style="margin:0;">Chart: Locked (tap Unlock to edit)</div>
+  <div class="row-small" style="gap:8px;">
+    <button class="btn ghost small" id="unlockChartBtn" type="button">Unlock chart</button>
+    <button class="btn ghost small" id="lockChartBtn" type="button" style="display:none;">Lock</button>
+    <button class="btn ghost small" id="clearOverridesBtn" type="button">Clear manual edits</button>
+  </div>
+</div>
+
+<div class="chartWrap" id="chartWrap"></div>
 
           <hr style="margin:14px 0; border-color:#eef2ff;" />
 
@@ -979,9 +989,14 @@
     /* =========================
        Storage keys
     ========================= */
-    const KEY_RECORDS = 'omd_records_v2';
-    const KEY_HFW_DB  = 'omd_hfw_db_v1';
-    const KEY_SOUND   = 'omd_soundOn_v1';
+ const KEY_RECORDS = 'omd_records_v2';
+const KEY_HFW_DB  = 'omd_hfw_db_v1';
+const KEY_SOUND   = 'omd_soundOn_v1';
+
+/* ✅ Chart manual override + lock state */
+const KEY_CHART_OVR   = 'omd_chart_overrides_v1';
+const KEY_CHART_UNLOCK = 'omd_chart_unlocked_v1';  // "1" means unlocked
+
 
     /* =========================
        xAPI helpers (safe)
@@ -1226,6 +1241,50 @@
     const soundToggle = document.getElementById('soundToggle');
     const soundLabel  = document.getElementById('soundLabel');
     let SOUND_ON = false;
+function loadChartOverrides(){
+  try{
+    const raw = localStorage.getItem(KEY_CHART_OVR);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){ return {}; }
+}
+function saveChartOverrides(obj){
+  try{ localStorage.setItem(KEY_CHART_OVR, JSON.stringify(obj)); }catch(e){}
+}
+
+let CHART_OVR = loadChartOverrides();
+
+function cellKey(mode, sid){
+  return `${mode}::${sid}`;
+}
+
+function isChartUnlocked(){
+  try{ return localStorage.getItem(KEY_CHART_UNLOCK) === '1'; }catch(e){ return false; }
+}
+function setChartUnlocked(on){
+  try{ localStorage.setItem(KEY_CHART_UNLOCK, on ? '1' : '0'); }catch(e){}
+}
+
+function getOverride(mode, cycle, session){
+  const sid = makeSessionId(cycle, session);
+  return CHART_OVR[cellKey(mode, sid)] || null;
+}
+function setOverride(mode, cycle, session, target, actual){
+  const sid = makeSessionId(cycle, session);
+  CHART_OVR[cellKey(mode, sid)] = {
+    mode,
+    sid,
+    cycle,
+    session,
+    target: (target === '' || target == null) ? '' : Number(target),
+    actual: (actual === '' || actual == null) ? '' : Number(actual),
+    ts: Date.now()
+  };
+  saveChartOverrides(CHART_OVR);
+}
+function clearAllOverrides(){
+  CHART_OVR = {};
+  saveChartOverrides(CHART_OVR);
+}
 
     function setSound(on){
       SOUND_ON = !!on;
@@ -1689,6 +1748,10 @@
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
     const newSessionBtn = document.getElementById('newSessionBtn');
 
+    const unlockChartBtn = document.getElementById('unlockChartBtn');
+    const lockChartBtn   = document.getElementById('lockChartBtn');
+    const clearOverridesBtn = document.getElementById('clearOverridesBtn');
+
     let MODE = 'P';
 
     function getItemsForSession(sessionId){
@@ -1986,7 +2049,7 @@
       updateStartButtonLabel();
     }
 
-    targetInput.addEventListener('input', ()=>{
+    targetInput.('input', ()=>{
       targetInput.dataset.locked = '1';
       updateScopePreview(false);
     });
@@ -2004,62 +2067,114 @@
     }
 
     function renderChart(){
-      const table = document.createElement('table');
+  const unlocked = isChartUnlocked();
 
-      const thead1 = document.createElement('tr');
-      thead1.innerHTML = `
-        <th rowspan="2" class="left">Cycle</th>
-        <th rowspan="2">Type</th>
-        <th colspan="2">Session 1</th>
-        <th colspan="2">Session 2</th>
-        <th colspan="2">Session 3</th>
-      `;
-      const thead2 = document.createElement('tr');
-      thead2.innerHTML = `
-        <th>Target</th><th>Actual</th>
-        <th>Target</th><th>Actual</th>
-        <th>Target</th><th>Actual</th>
-      `;
+  // toolbar hint + buttons
+  const hint = document.getElementById('chartLockHint');
+  const ub = document.getElementById('unlockChartBtn');
+  const lb = document.getElementById('lockChartBtn');
+  if(hint){
+    hint.textContent = unlocked ? 'Chart: UNLOCKED (editing enabled)' : 'Chart: Locked (tap Unlock to edit)';
+  }
+  if(ub) ub.style.display = unlocked ? 'none' : '';
+  if(lb) lb.style.display = unlocked ? '' : 'none';
 
-      table.appendChild(thead1);
-      table.appendChild(thead2);
+  const table = document.createElement('table');
 
-      for(let c=1;c<=TOTAL_CYCLES;c++){
-        const trP = document.createElement('tr');
-        trP.innerHTML = `<td class="left" rowspan="3"><b>Cycle ${c}</b></td><td class="typeCell">P</td>`;
-        for(let s=1;s<=SESSIONS_PER_CYCLE;s++){
-          const rec = getLatestByCell('P', c, s);
-          const t = rec ? rec.target : '';
-          const a = rec ? rec.correct : '';
-          trP.innerHTML += `<td>${t!==''?t:'<span class="mutedCell">—</span>'}</td><td>${a!==''?a:'<span class="mutedCell">—</span>'}</td>`;
-        }
+  const thead1 = document.createElement('tr');
+  thead1.innerHTML = `
+    <th rowspan="2" class="left">Cycle</th>
+    <th rowspan="2">Type</th>
+    <th colspan="2">Session 1</th>
+    <th colspan="2">Session 2</th>
+    <th colspan="2">Session 3</th>
+  `;
+  const thead2 = document.createElement('tr');
+  thead2.innerHTML = `
+    <th>Target</th><th>Actual</th>
+    <th>Target</th><th>Actual</th>
+    <th>Target</th><th>Actual</th>
+  `;
 
-        const trH = document.createElement('tr');
-        trH.innerHTML = `<td class="typeCell">HFW</td>`;
-        for(let s=1;s<=SESSIONS_PER_CYCLE;s++){
-          const rec = getLatestByCell('HFW', c, s);
-          const t = rec ? rec.target : '';
-          const a = rec ? rec.correct : '';
-          trH.innerHTML += `<td>${t!==''?t:'<span class="mutedCell">—</span>'}</td><td>${a!==''?a:'<span class="mutedCell">—</span>'}</td>`;
-        }
+  table.appendChild(thead1);
+  table.appendChild(thead2);
 
-        const trW = document.createElement('tr');
-        trW.innerHTML = `<td class="typeCell">Words</td>`;
-        for(let s=1;s<=SESSIONS_PER_CYCLE;s++){
-          const rec = getLatestByCell('W', c, s);
-          const t = rec ? rec.target : '';
-          const a = rec ? rec.correct : '';
-          trW.innerHTML += `<td>${t!==''?t:'<span class="mutedCell">—</span>'}</td><td>${a!==''?a:'<span class="mutedCell">—</span>'}</td>`;
-        }
+  function valueForCell(mode, c, s){
+    const ovr = getOverride(mode, c, s);
+    if(ovr) return { target: ovr.target, actual: ovr.actual, source:'manual' };
 
-        table.appendChild(trP);
-        table.appendChild(trH);
-        table.appendChild(trW);
-      }
+    const rec = getLatestByCell(mode, c, s);
+    if(rec) return { target: rec.target, actual: rec.correct, source:'auto' };
 
-      chartWrap.innerHTML = '';
-      chartWrap.appendChild(table);
+    return { target:'', actual:'', source:'none' };
+  }
+
+  function tdValue(v){
+    if(v === '' || v == null || Number.isNaN(v)) return '<span class="mutedCell">—</span>';
+    return String(v);
+  }
+
+  function mkInputCell(mode, c, s, field, val){
+    const td = document.createElement('td');
+
+    if(!unlocked){
+      td.innerHTML = tdValue(val);
+      return td;
     }
+
+    const inp = document.createElement('input');
+    inp.type = 'number';
+    inp.min = '0';
+    inp.value = (val === '' || val == null) ? '' : String(val);
+    inp.style.width = '88px';
+    inp.style.padding = '6px 8px';
+    inp.style.borderRadius = '10px';
+    inp.style.border = '1px solid var(--line)';
+    inp.style.fontWeight = '900';
+    inp.style.background = 'var(--paper)';
+    inp.style.textAlign = 'center';
+
+    inp.addEventListener('change', ()=>{
+      const cur = valueForCell(mode, c, s);
+      const newVal = inp.value === '' ? '' : Number(inp.value);
+      const target = (field === 'target') ? newVal : cur.target;
+      const actual = (field === 'actual') ? newVal : cur.actual;
+      setOverride(mode, c, s, target, actual);
+      status(`Saved manual chart edit: ${mode} ${makeSessionId(c,s)} (T=${target}, A=${actual})`);
+      // re-render to show any style changes if you add later
+      renderChart();
+    });
+
+    td.appendChild(inp);
+    return td;
+  }
+
+  function buildRow(modeLabel, modeCode, c){
+    const tr = document.createElement('tr');
+    tr.innerHTML = (modeLabel === 'P')
+      ? `<td class="left" rowspan="3"><b>Cycle ${c}</b></td><td class="typeCell">${modeLabel}</td>`
+      : `<td class="typeCell">${modeLabel}</td>`;
+
+    for(let s=1; s<=SESSIONS_PER_CYCLE; s++){
+      const v = valueForCell(modeCode, c, s);
+      tr.appendChild(mkInputCell(modeCode, c, s, 'target', v.target));
+      tr.appendChild(mkInputCell(modeCode, c, s, 'actual', v.actual));
+    }
+    return tr;
+  }
+
+  for(let c=1;c<=TOTAL_CYCLES;c++){
+    const trP = buildRow('P', 'P', c);
+    const trH = buildRow('HFW', 'HFW', c);
+    const trW = buildRow('Words', 'W', c);
+    table.appendChild(trP);
+    table.appendChild(trH);
+    table.appendChild(trW);
+  }
+
+  chartWrap.innerHTML = '';
+  chartWrap.appendChild(table);
+}
 
     function fmtTime(ts){
       const d = new Date(ts);
@@ -2864,14 +2979,35 @@
       URL.revokeObjectURL(url);
     }
 
-    exportBtn.addEventListener('click', ()=>{
-      const payload = {
-        exportedAt: new Date().toISOString(),
-        records: RECORDS,
-        hfwDb: HFW_DB
-      };
-      downloadJSON(payload, `one-minute-dash-records-${Date.now()}.json`);
-    });
+   exportBtn.addEventListener('click', ()=>{
+  // Build snapshot = exactly what is shown on chart now
+  const snapshot = {};
+  for(let c=1;c<=TOTAL_CYCLES;c++){
+    for(let s=1;s<=SESSIONS_PER_CYCLE;s++){
+      const sid = makeSessionId(c,s);
+      snapshot[sid] = snapshot[sid] || {};
+      ['P','HFW','W'].forEach(mode=>{
+        const ovr = getOverride(mode, c, s);
+        const rec = getLatestByCell(mode, c, s);
+        snapshot[sid][mode] = {
+          target: ovr ? ovr.target : (rec ? rec.target : ''),
+          actual: ovr ? ovr.actual : (rec ? rec.correct : ''),
+          source: ovr ? 'manual' : (rec ? 'auto' : 'none')
+        };
+      });
+    }
+  }
+
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    records: RECORDS,
+    hfwDb: HFW_DB,
+    chartOverrides: CHART_OVR,
+    chartSnapshot: snapshot
+  };
+  downloadJSON(payload, `one-minute-dash-records-${Date.now()}.json`);
+});
+
 
     importBtn.addEventListener('click', ()=> importFile.click());
 
@@ -2885,7 +3021,9 @@
         const obj = JSON.parse(text);
 
         const incomingRecords = Array.isArray(obj.records) ? obj.records : [];
-        const incomingHfw = (obj.hfwDb && typeof obj.hfwDb === 'object') ? obj.hfwDb : {};
+const incomingHfw = (obj.hfwDb && typeof obj.hfwDb === 'object') ? obj.hfwDb : {};
+const incomingOverrides = (obj.chartOverrides && typeof obj.chartOverrides === 'object') ? obj.chartOverrides : null;
+
 
         const byId = new Map(RECORDS.map(r=> [r.id, r]));
         incomingRecords.forEach(r=>{
@@ -2897,6 +3035,10 @@
 
         HFW_DB = { ...(HFW_DB||{}), ...(incomingHfw||{}) };
         saveHfwDb(HFW_DB);
+        if(incomingOverrides){
+        CHART_OVR = { ...(CHART_OVR||{}), ...(incomingOverrides||{}) };
+        saveChartOverrides(CHART_OVR);
+        }
 
         status('Imported JSON successfully.');
         rebuildAtSelect();
@@ -2919,6 +3061,34 @@
       renderChart();
       renderHistory();
     });
+if(unlockChartBtn){
+  unlockChartBtn.addEventListener('click', ()=>{
+    const pw = prompt('Enter password to unlock chart editing:');
+    if(pw === '0000'){
+      setChartUnlocked(true);
+      status('Chart unlocked. You can edit targets/actuals directly in the table.');
+      renderChart();
+    } else {
+      alert('Wrong password.');
+    }
+  });
+}
+if(lockChartBtn){
+  lockChartBtn.addEventListener('click', ()=>{
+    setChartUnlocked(false);
+    status('Chart locked.');
+    renderChart();
+  });
+}
+if(clearOverridesBtn){
+  clearOverridesBtn.addEventListener('click', ()=>{
+    const ok = confirm('Clear ALL manual chart edits? (Auto values from timed records will still remain.)');
+    if(!ok) return;
+    clearAllOverrides();
+    status('Manual chart edits cleared.');
+    renderChart();
+  });
+}
 
     resetBtn.addEventListener('click', ()=>{
       const ok = confirm('Reset target lock and refresh scope preview?');
@@ -2968,3 +3138,4 @@
   </script>
 </body>
 </html>
+
