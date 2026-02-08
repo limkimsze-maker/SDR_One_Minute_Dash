@@ -70,6 +70,7 @@
       --itemline:#d6e6ff;  /* softer border */
       --bg:#d1d5db;        /* matte grey */
       --card:#e5e7eb;      /* slightly lighter matte grey for the app surface */
+      --grid:#94a3b8;  /* ✅ darker lines for chart/table grid */
 
       /* ✅ Light green "paper" surfaces (replaces white) */
       --paper:#e9fbe9;
@@ -446,28 +447,30 @@
 
     .chartWrap{ overflow:auto; }
     table{
-      border-collapse:separate;
-      border-spacing:0;
-      width:100%;
-      font-size:13px;
-      background:var(--paper); /* ✅ was #fff */
-      border:1px solid var(--line);
-      border-radius:14px;
-      overflow:hidden;
-    }
-    th, td{
-      padding:8px 10px;
-      border-bottom:1px solid var(--line);
-      border-right:1px solid var(--line);
-      text-align:center;
-      vertical-align:middle;
-      white-space:nowrap;
-    }
+  border-collapse:separate;
+  border-spacing:0;
+  width:100%;
+  font-size:13px;
+  background:var(--paper);
+  border:1px solid var(--grid);   /* ✅ */
+  border-radius:14px;
+  overflow:hidden;
+}
+th, td{
+  padding:8px 10px;
+  border-bottom:1px solid var(--grid);  /* ✅ */
+  border-right:1px solid var(--grid);   /* ✅ */
+  text-align:center;
+  vertical-align:middle;
+  white-space:nowrap;
+}
+
     th{
       background:#eff6ff;
       color:#1e3a8a;
       font-weight:1000;
     }
+    th{ border-bottom:2px solid var(--grid); }
     tr:last-child td{ border-bottom:none; }
     td:last-child, th:last-child{ border-right:none; }
     .left{ text-align:left; }
@@ -3139,5 +3142,6 @@ if(clearOverridesBtn){
   </script>
 </body>
 </html>
+
 
 
