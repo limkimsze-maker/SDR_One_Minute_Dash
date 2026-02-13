@@ -60,24 +60,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
 
   <style>
-    /* =========================================
-       Readability + Comfort (Kim Sze)
-       - Keep grey + light blue background
-       - Change remaining white surfaces to light green
-    ========================================= */
     :root{
-      --itembg:#eaf2ff;    /* softer light blue */
-      --itemline:#d6e6ff;  /* softer border */
-      --bg:#d1d5db;        /* matte grey */
-      --card:#e5e7eb;      /* slightly lighter matte grey for the app surface */
-      --grid:#94a3b8;  /* ✅ darker lines for chart/table grid */
+      --itembg:#eaf2ff;
+      --itemline:#d6e6ff;
+      --bg:#d1d5db;
+      --card:#e5e7eb;
+      --grid:#94a3b8;
 
-      /* ✅ Light green "paper" surfaces (replaces white) */
       --paper:#e9fbe9;
       --paper2:#f3fdf3;
 
-      --ink:#111827;       /* near-black */
-      --muted:#374151;     /* stronger muted */
+      --ink:#111827;
+      --muted:#374151;
       --line:#e9eef7;
       --brand:#2563eb;
       --good:#16a34a;
@@ -88,9 +82,9 @@
       --radius:16px;
       --shadow: 0 16px 40px rgba(0,0,0,.08);
 
-      --vowel:#dc2626;   /* red */
-      --prefix:#16a34a;  /* green */
-      --suffix:#2563eb;  /* blue */
+      --vowel:#dc2626;
+      --prefix:#16a34a;
+      --suffix:#2563eb;
     }
 
     *{ box-sizing:border-box; }
@@ -124,9 +118,8 @@
       border-radius: 10px;
     }
 
-    /* Keep xAPI base hidden but present */
     .container{
-      background:var(--paper); /* ✅ was #fff */
+      background:var(--paper);
       padding:10px;
       border-radius:8px;
       box-shadow:0 0 5px rgba(0,0,0,.08);
@@ -136,7 +129,6 @@
     }
     #xapiBase{ display:none; }
 
-    /* App shell */
     #omdApp{
       width:min(1200px, 95vw);
       background:var(--card);
@@ -198,7 +190,7 @@
     }
 
     .panel{
-      background:var(--paper2); /* ✅ was #fbfcff */
+      background:var(--paper2);
       border:1px solid var(--line);
       border-radius:14px;
       padding:14px;
@@ -207,7 +199,7 @@
     }
 
     .control{
-      background:var(--paper); /* ✅ was #fff */
+      background:var(--paper);
       border:1px solid var(--line);
       border-radius:14px;
       padding:12px;
@@ -251,7 +243,7 @@
     }
     .btn:active{ transform:translateY(1px); box-shadow: 0 6px 14px rgba(0,0,0,.10); }
     .btn.ghost{
-      background:var(--paper); /* ✅ was #fff */
+      background:var(--paper);
       color:var(--brand);
       border:1px solid #cfe1ff;
       box-shadow:none;
@@ -272,7 +264,7 @@
       padding:8px 12px;
       border-radius:999px;
       border:1px solid var(--line);
-      background:var(--paper); /* ✅ was #fff */
+      background:var(--paper);
       color:var(--ink);
       font-weight:900;
       cursor:pointer;
@@ -292,7 +284,7 @@
       padding:10px 12px;
       border:1px solid var(--line);
       border-radius:12px;
-      background:var(--paper); /* ✅ was #fff */
+      background:var(--paper);
       color:var(--ink);
       font-weight:700;
     }
@@ -304,7 +296,7 @@
       border-radius:12px;
       resize:vertical;
       font-weight:700;
-      background:var(--paper); /* ✅ added */
+      background:var(--paper);
       color:var(--ink);
     }
 
@@ -340,7 +332,7 @@
       padding:6px 10px;
       border-radius:999px;
       border:1px solid #e2e8f0;
-      background:var(--paper2); /* ✅ was #f8fafc */
+      background:var(--paper2);
       color:#0f172a;
       font-weight:1000;
       font-size:13px;
@@ -438,7 +430,7 @@
       font-size:13px;
     }
     .kpi span{
-      background:var(--paper2); /* ✅ was #f8fafc */
+      background:var(--paper2);
       border:1px solid #e2e8f0;
       border-radius:999px;
       padding:6px 10px;
@@ -447,23 +439,23 @@
 
     .chartWrap{ overflow:auto; }
     table{
-  border-collapse:separate;
-  border-spacing:0;
-  width:100%;
-  font-size:13px;
-  background:var(--paper);
-  border:1px solid var(--grid);   /* ✅ */
-  border-radius:14px;
-  overflow:hidden;
-}
-th, td{
-  padding:8px 10px;
-  border-bottom:1px solid var(--grid);  /* ✅ */
-  border-right:1px solid var(--grid);   /* ✅ */
-  text-align:center;
-  vertical-align:middle;
-  white-space:nowrap;
-}
+      border-collapse:separate;
+      border-spacing:0;
+      width:100%;
+      font-size:13px;
+      background:var(--paper);
+      border:1px solid var(--grid);
+      border-radius:14px;
+      overflow:hidden;
+    }
+    th, td{
+      padding:8px 10px;
+      border-bottom:1px solid var(--grid);
+      border-right:1px solid var(--grid);
+      text-align:center;
+      vertical-align:middle;
+      white-space:nowrap;
+    }
 
     th{
       background:#eff6ff;
@@ -477,7 +469,7 @@ th, td{
     .typeCell{
       font-weight:1000;
       color:#111827;
-      background:var(--paper2); /* ✅ was #fbfcff */
+      background:var(--paper2);
     }
     .mutedCell{ color:#94a3b8; }
 
@@ -489,7 +481,7 @@ th, td{
       border:1px solid var(--line);
       border-radius:12px;
       padding:10px;
-      background:var(--paper); /* ✅ was #fff */
+      background:var(--paper);
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
@@ -507,7 +499,7 @@ th, td{
 
     .review-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:12px; }
     .review-card{
-      background:var(--paper); /* ✅ was #fff */
+      background:var(--paper);
       border:1px solid var(--line);
       border-radius:14px;
       padding:12px;
@@ -538,7 +530,7 @@ th, td{
       padding:8px 10px;
       border-radius:999px;
       border:1px solid var(--line);
-      background:var(--paper); /* ✅ was #fff */
+      background:var(--paper);
       cursor:pointer;
       user-select:none;
       font-weight:1000;
@@ -564,7 +556,7 @@ th, td{
       padding:10px 10px;
       border:1px solid var(--line);
       border-radius:12px;
-      background:var(--paper2); /* ✅ was #fbfcff */
+      background:var(--paper2);
     }
     .wordText{
       font-size:20px;
@@ -586,7 +578,6 @@ th, td{
 
     #player{ position:fixed; left:12px; bottom:12px; width:280px; display:none; }
 
-    /* ====== Effects overlay (Drumroll + Confetti) ====== */
     #fxOverlay{
       position:fixed;
       inset:0;
@@ -598,7 +589,7 @@ th, td{
     }
     #fxOverlay .card{
       pointer-events:none;
-      background:var(--paper); /* ✅ was #ffffff */
+      background:var(--paper);
       border-radius:18px;
       border:1px solid #e2e8f0;
       box-shadow: 0 20px 60px rgba(0,0,0,.22);
@@ -640,7 +631,6 @@ th, td{
 </head>
 
 <body>
-  <!-- FX overlay + confetti canvas -->
   <canvas id="confettiCanvas"></canvas>
   <div id="fxOverlay" aria-hidden="true">
     <div class="card">
@@ -649,7 +639,6 @@ th, td{
     </div>
   </div>
 
-  <!-- xAPI base (kept but hidden) -->
   <div id="xapiBase" class="container">
     <p class="center"><strong>HTML5 Interactive</strong></p>
     <div class="center">
@@ -678,7 +667,6 @@ th, td{
     </div>
   </div>
 
-  <!-- One Minute Dash App -->
   <div id="omdApp">
     <header>
       <h1>🏃‍♂️ One Minute Dash</h1>
@@ -708,7 +696,6 @@ th, td{
       </div>
     </header>
 
-    <!-- SETUP VIEW -->
     <section id="setupView" class="view active">
       <div class="row">
         <section class="controls">
@@ -826,18 +813,18 @@ th, td{
         </section>
 
         <section class="panel">
-         <h3 style="margin:4px 0 10px;">P3 SDR One Minute Dash Chart (Timed only — Target vs Actual)</h3>
+          <h3 style="margin:4px 0 10px;">P3 SDR One Minute Dash Chart (Timed only — Target vs Actual)</h3>
 
-<div class="row-small" style="justify-content:space-between; margin:0 0 10px;">
-  <div class="hint" id="chartLockHint" style="margin:0;">Chart: Locked (tap Unlock to edit)</div>
-  <div class="row-small" style="gap:8px;">
-    <button class="btn ghost small" id="unlockChartBtn" type="button">Unlock chart</button>
-    <button class="btn ghost small" id="lockChartBtn" type="button" style="display:none;">Lock</button>
-    <button class="btn ghost small" id="clearOverridesBtn" type="button">Clear manual edits</button>
-  </div>
-</div>
+          <div class="row-small" style="justify-content:space-between; margin:0 0 10px;">
+            <div class="hint" id="chartLockHint" style="margin:0;">Chart: Locked (tap Unlock to edit)</div>
+            <div class="row-small" style="gap:8px;">
+              <button class="btn ghost small" id="unlockChartBtn" type="button">Unlock chart</button>
+              <button class="btn ghost small" id="lockChartBtn" type="button" style="display:none;">Lock</button>
+              <button class="btn ghost small" id="clearOverridesBtn" type="button">Clear manual edits</button>
+            </div>
+          </div>
 
-<div class="chartWrap" id="chartWrap"></div>
+          <div class="chartWrap" id="chartWrap"></div>
 
           <hr style="margin:14px 0; border-color:#eef2ff;" />
 
@@ -847,7 +834,6 @@ th, td{
       </div>
     </section>
 
-    <!-- ✅ DAY VIEW -->
     <section id="dayView" class="view">
       <div class="dashCard" style="width:100%;">
         <div class="row-small" style="width:100%; justify-content:space-between; gap:10px;">
@@ -876,7 +862,6 @@ th, td{
       </div>
     </section>
 
-    <!-- DASH VIEW -->
     <section id="dashView" class="view">
       <div class="dashCard">
         <div class="row-small" style="width:100%; justify-content:space-between; gap:10px;">
@@ -909,7 +894,6 @@ th, td{
       </div>
     </section>
 
-    <!-- RESULTS VIEW -->
     <section id="resultView" class="view">
       <div class="control">
         <h3>Dash summary</h3>
@@ -943,7 +927,6 @@ th, td{
       </div>
     </section>
 
-    <!-- REVIEW WRONG VIEW -->
     <section id="reviewView" class="view">
       <div class="control">
         <div class="row-small" style="justify-content:space-between;">
@@ -959,7 +942,6 @@ th, td{
       </div>
     </section>
 
-    <!-- READ REMAINING VIEW -->
     <section id="remainingView" class="view">
       <div class="dashCard">
         <div class="row-small" style="width:100%; justify-content:space-between;">
@@ -986,24 +968,15 @@ th, td{
 
   <audio id="player" preload="auto" playsinline></audio>
 
-  <!-- ✅ Everything below is your original JS, unchanged -->
   <script>
   (function(){
-    /* =========================
-       Storage keys
-    ========================= */
- const KEY_RECORDS = 'omd_records_v2';
-const KEY_HFW_DB  = 'omd_hfw_db_v1';
-const KEY_SOUND   = 'omd_soundOn_v1';
+    const KEY_RECORDS = 'omd_records_v2';
+    const KEY_HFW_DB  = 'omd_hfw_db_v1';
+    const KEY_SOUND   = 'omd_soundOn_v1';
 
-/* ✅ Chart manual override + lock state */
-const KEY_CHART_OVR   = 'omd_chart_overrides_v1';
-const KEY_CHART_UNLOCK = 'omd_chart_unlocked_v1';  // "1" means unlocked
+    const KEY_CHART_OVR    = 'omd_chart_overrides_v1';
+    const KEY_CHART_UNLOCK = 'omd_chart_unlocked_v1';
 
-
-    /* =========================
-       xAPI helpers (safe)
-    ========================= */
     function pushToXAPI(score, feedback){
       try {
         const sInput = document.getElementById('score-input');
@@ -1015,14 +988,11 @@ const KEY_CHART_UNLOCK = 'omd_chart_unlocked_v1';  // "1" means unlocked
         const badge = document.getElementById('statusBadge');
         if (badge){
           badge.style.display = 'block';
-          badge.textContent = `Saved for SLS · Score ${score}${feedback ? ' · ' + (feedback.length>60 ? (feedback.slice(0,60)+'…') : feedback) : ''}`; 
+          badge.textContent = `Saved for SLS · Score ${score}${feedback ? ' · ' + (feedback.length>60 ? (feedback.slice(0,60)+'…') : feedback) : ''}`;
         }
       } catch(e) {}
     }
 
-    /* =========================
-       Session ordering (18 cycles × 3 sessions)
-    ========================= */
     const TOTAL_CYCLES = 18;
     const SESSIONS_PER_CYCLE = 3;
 
@@ -1039,9 +1009,6 @@ const KEY_CHART_UNLOCK = 'omd_chart_unlocked_v1';  // "1" means unlocked
       }
     }
 
-    /* =========================
-       Phonogram DB (FROM YOUR HTML)
-    ========================= */
     const DB = [
       { id: "C1S1", title: "C1S1: Review consonant and vowel graphs", items: ["a","e","i","o","u","b","c-hard","d","f","g-hard","h","j","k","l","m","n","p","qu","r","s","t","v","w","x","y","z"] },
       { id: "C1S2", title: "C1S2: Digraphs [ch, sh, th]", items: ["ch","sh","th"] },
@@ -1104,9 +1071,6 @@ const KEY_CHART_UNLOCK = 'omd_chart_unlocked_v1';  // "1" means unlocked
       TITLE_MAP[s.id] = s.title || s.id;
     });
 
-    /* =========================
-       WORDS DB (ALL words, C1–C18)
-    ========================= */
     const WORD_DB = {
       "C1S1": ["map","hot","bag","fix","sun","yes","hid","cut","box","dad","fun","hat","men","mud","nod","set","sit","tip"],
       "C1S2": ["shut","with","chat","ship","then","chop","that","moth","chip","rich","shop","shed","wish","they","thaw"],
@@ -1244,50 +1208,51 @@ const KEY_CHART_UNLOCK = 'omd_chart_unlocked_v1';  // "1" means unlocked
     const soundToggle = document.getElementById('soundToggle');
     const soundLabel  = document.getElementById('soundLabel');
     let SOUND_ON = false;
-function loadChartOverrides(){
-  try{
-    const raw = localStorage.getItem(KEY_CHART_OVR);
-    return raw ? JSON.parse(raw) : {};
-  }catch(e){ return {}; }
-}
-function saveChartOverrides(obj){
-  try{ localStorage.setItem(KEY_CHART_OVR, JSON.stringify(obj)); }catch(e){}
-}
 
-let CHART_OVR = loadChartOverrides();
+    function loadChartOverrides(){
+      try{
+        const raw = localStorage.getItem(KEY_CHART_OVR);
+        return raw ? JSON.parse(raw) : {};
+      }catch(e){ return {}; }
+    }
+    function saveChartOverrides(obj){
+      try{ localStorage.setItem(KEY_CHART_OVR, JSON.stringify(obj)); }catch(e){}
+    }
 
-function cellKey(mode, sid){
-  return `${mode}::${sid}`;
-}
+    let CHART_OVR = loadChartOverrides();
 
-function isChartUnlocked(){
-  try{ return localStorage.getItem(KEY_CHART_UNLOCK) === '1'; }catch(e){ return false; }
-}
-function setChartUnlocked(on){
-  try{ localStorage.setItem(KEY_CHART_UNLOCK, on ? '1' : '0'); }catch(e){}
-}
+    function cellKey(mode, sid){
+      return `${mode}::${sid}`;
+    }
 
-function getOverride(mode, cycle, session){
-  const sid = makeSessionId(cycle, session);
-  return CHART_OVR[cellKey(mode, sid)] || null;
-}
-function setOverride(mode, cycle, session, target, actual){
-  const sid = makeSessionId(cycle, session);
-  CHART_OVR[cellKey(mode, sid)] = {
-    mode,
-    sid,
-    cycle,
-    session,
-    target: (target === '' || target == null) ? '' : Number(target),
-    actual: (actual === '' || actual == null) ? '' : Number(actual),
-    ts: Date.now()
-  };
-  saveChartOverrides(CHART_OVR);
-}
-function clearAllOverrides(){
-  CHART_OVR = {};
-  saveChartOverrides(CHART_OVR);
-}
+    function isChartUnlocked(){
+      try{ return localStorage.getItem(KEY_CHART_UNLOCK) === '1'; }catch(e){ return false; }
+    }
+    function setChartUnlocked(on){
+      try{ localStorage.setItem(KEY_CHART_UNLOCK, on ? '1' : '0'); }catch(e){}
+    }
+
+    function getOverride(mode, cycle, session){
+      const sid = makeSessionId(cycle, session);
+      return CHART_OVR[cellKey(mode, sid)] || null;
+    }
+    function setOverride(mode, cycle, session, target, actual){
+      const sid = makeSessionId(cycle, session);
+      CHART_OVR[cellKey(mode, sid)] = {
+        mode,
+        sid,
+        cycle,
+        session,
+        target: (target === '' || target == null) ? '' : Number(target),
+        actual: (actual === '' || actual == null) ? '' : Number(actual),
+        ts: Date.now()
+      };
+      saveChartOverrides(CHART_OVR);
+    }
+    function clearAllOverrides(){
+      CHART_OVR = {};
+      saveChartOverrides(CHART_OVR);
+    }
 
     function setSound(on){
       SOUND_ON = !!on;
@@ -1359,11 +1324,6 @@ function clearAllOverrides(){
       const candidates = AUDIO_EXTS.map(ext => `${WORD_BASE}${name}.${ext}`);
       const ok = await playViaPlayer(candidates);
       if(!ok) speak(word);
-    }
-
-    function playWordsTTS(encodedOrWord){
-      const d = decodeWordItem(encodedOrWord);
-      speak(d.word);
     }
 
     let _timerCtx = null;
@@ -1473,29 +1433,19 @@ function clearAllOverrides(){
       });
     }
 
-  function markRControlled(s, marks){
-  const w = s.toLowerCase();
-
-  for(const pat of R_CONTROLLED){
-    for(let i=0;i<=w.length-2;i++){
-      if(w.slice(i,i+2) !== pat) continue;
-
-      const after = w[i+2];
-
-      // If 'r' is followed by a vowel, treat r as consonant starting next syllable
-      // hero, zero, syrup-like splits, etc.
-      if(after && isVowelChar(after)) continue;
-
-      // If the pair is at the start of the word (e.g., "er..." as in "erase"),
-      // also NOT r-controlled for your classroom colouring purpose.
-      if(i === 0) continue;
-
-      marks[i] = true;
-      marks[i+1] = true;
+    function markRControlled(s, marks){
+      const w = s.toLowerCase();
+      for(const pat of R_CONTROLLED){
+        for(let i=0;i<=w.length-2;i++){
+          if(w.slice(i,i+2) !== pat) continue;
+          const after = w[i+2];
+          if(after && isVowelChar(after)) continue;
+          if(i === 0) continue;
+          marks[i] = true;
+          marks[i+1] = true;
+        }
+      }
     }
-  }
-}
-
 
     function markConsonantLE(s, marks){
       const w = s.toLowerCase();
@@ -1515,31 +1465,17 @@ function clearAllOverrides(){
       marks[n-1] = true;
     }
 
-   function markOpenSyllableEnd(s, marks){
-  const w = s.toLowerCase();
-
-  // V-C-V: mark ONLY the first vowel as long (open syllable)
-  // e.g., h e r o -> mark 'e' (not 'o' here)
-  for(let i = 0; i < w.length - 2; i++){
-    if(
-      isVowelChar(w[i]) &&
-      !isVowelChar(w[i+1]) &&
-      isVowelChar(w[i+2])
-    ){
-      marks[i] = true;
+    function markOpenSyllableEnd(s, marks){
+      const w = s.toLowerCase();
+      for(let i = 0; i < w.length - 2; i++){
+        if(isVowelChar(w[i]) && !isVowelChar(w[i+1]) && isVowelChar(w[i+2])){
+          marks[i] = true;
+        }
+      }
+      if(w.length >= 2 && !isVowelChar(w[w.length-2]) && isVowelChar(w[w.length-1])){
+        marks[w.length-1] = true;
+      }
     }
-  }
-
-  // final open vowel (ends with consonant + vowel): mark last vowel
-  // e.g., hero -> mark final 'o'; zero -> mark final 'o'
-  if(
-    w.length >= 2 &&
-    !isVowelChar(w[w.length-2]) &&
-    isVowelChar(w[w.length-1])
-  ){
-    marks[w.length-1] = true;
-  }
-}
 
     function markYVowel(s, marks){
       const w = s.toLowerCase();
@@ -1550,6 +1486,38 @@ function clearAllOverrides(){
         const next = w[i+1];
         if(!next || !isVowelChar(next)){
           marks[i] = true;
+        }
+      }
+    }
+
+    /* ✅ FIX: missing function was breaking Words of the Day (ReferenceError) */
+    function markShortVowelsClosed(s, marks){
+      const w = String(s||'').toLowerCase();
+
+      // If it's a true magic-e word, do NOT force short vowel on the V in VCe
+      const magicE = shouldMagicE(w);
+
+      for(let i=0;i<w.length;i++){
+        if(!isVowelChar(w[i])) continue;
+        if(marks[i]) continue; // never override long/pattern marks
+
+        // skip the long vowel in a magic-e pattern (V C e) -> the vowel is at n-3
+        if(magicE && i === w.length - 3) continue;
+
+        // closed syllable heuristic: vowel followed by consonant, and then
+        // (end) or (another consonant). Example: c a t, h o t, f i x, b a g, s u n
+        const n1 = w[i+1];
+        if(!n1) continue;
+        if(isVowelChar(n1)) continue;
+
+        const n2 = w[i+2];
+        if(!n2){
+          marks[i] = true;
+          continue;
+        }
+        if(!isVowelChar(n2)){
+          marks[i] = true;
+          continue;
         }
       }
     }
@@ -1600,26 +1568,13 @@ function clearAllOverrides(){
       const prefMarks  = new Array(s.length).fill(false);
       const sufMarks   = new Array(s.length).fill(false);
 
-            // 1) vowel teams + special patterns
       markAllPatterns(w, TEAM_PATTERNS, vowelMarks);
-
-      // 2) r-controlled (ar/or/ir/er/ur)
       markRControlled(w, vowelMarks);
-
-      // 3) magic-e and consonant-le
       markMagicE(w, vowelMarks);
       markConsonantLE(w, vowelMarks);
-
-      // 4) open syllable (V-C-V and final open vowel)
       markOpenSyllableEnd(w, vowelMarks);
-
-      // 5) y as vowel (end-of-word / syllable)
       markYVowel(w, vowelMarks);
-
-      // 6) short vowels closed — MUST be last and MUST NOT override long marks
       markShortVowelsClosed(w, vowelMarks);
-
-
 
       markPrefixBySid(w, sid, prefMarks);
       markSuffixBySid(w, sid, sufMarks);
@@ -1636,10 +1591,10 @@ function clearAllOverrides(){
           continue;
         }
 
-       let cls = 'cons';
-       if(prefMarks[i])  cls = 'pre';
-       if(sufMarks[i])   cls = 'suf';
-       if(vowelMarks[i]) cls = 'vowel'; // vowel last
+        let cls = 'cons';
+        if(prefMarks[i])  cls = 'pre';
+        if(sufMarks[i])   cls = 'suf';
+        if(vowelMarks[i]) cls = 'vowel';
         out += `<span class="${cls}">${ch}</span>`;
       }
       return out;
@@ -2069,9 +2024,9 @@ function clearAllOverrides(){
     }
 
     targetInput.addEventListener('input', ()=>{
-  targetInput.dataset.locked = '1';
-  updateScopePreview(false);
-});
+      targetInput.dataset.locked = '1';
+      updateScopePreview(false);
+    });
 
     autoTargetBtn.addEventListener('click', ()=>{
       targetInput.dataset.locked = '0';
@@ -2087,114 +2042,109 @@ function clearAllOverrides(){
     }
 
     function renderChart(){
-  const unlocked = isChartUnlocked();
+      const unlocked = isChartUnlocked();
 
-  // toolbar hint + buttons
-  const hint = document.getElementById('chartLockHint');
-  const ub = document.getElementById('unlockChartBtn');
-  const lb = document.getElementById('lockChartBtn');
-  if(hint){
-    hint.textContent = unlocked ? 'Chart: UNLOCKED (editing enabled)' : 'Chart: Locked (tap Unlock to edit)';
-  }
-  if(ub) ub.style.display = unlocked ? 'none' : '';
-  if(lb) lb.style.display = unlocked ? '' : 'none';
+      const hint = document.getElementById('chartLockHint');
+      const ub = document.getElementById('unlockChartBtn');
+      const lb = document.getElementById('lockChartBtn');
+      if(hint){
+        hint.textContent = unlocked ? 'Chart: UNLOCKED (editing enabled)' : 'Chart: Locked (tap Unlock to edit)';
+      }
+      if(ub) ub.style.display = unlocked ? 'none' : '';
+      if(lb) lb.style.display = unlocked ? '' : 'none';
 
-  const table = document.createElement('table');
+      const table = document.createElement('table');
 
-  const thead1 = document.createElement('tr');
-  thead1.innerHTML = `
-    <th rowspan="2" class="left">Cycle</th>
-    <th rowspan="2">Type</th>
-    <th colspan="2">Session 1</th>
-    <th colspan="2">Session 2</th>
-    <th colspan="2">Session 3</th>
-  `;
-  const thead2 = document.createElement('tr');
-  thead2.innerHTML = `
-    <th>Target</th><th>Actual</th>
-    <th>Target</th><th>Actual</th>
-    <th>Target</th><th>Actual</th>
-  `;
+      const thead1 = document.createElement('tr');
+      thead1.innerHTML = `
+        <th rowspan="2" class="left">Cycle</th>
+        <th rowspan="2">Type</th>
+        <th colspan="2">Session 1</th>
+        <th colspan="2">Session 2</th>
+        <th colspan="2">Session 3</th>
+      `;
+      const thead2 = document.createElement('tr');
+      thead2.innerHTML = `
+        <th>Target</th><th>Actual</th>
+        <th>Target</th><th>Actual</th>
+        <th>Target</th><th>Actual</th>
+      `;
 
-  table.appendChild(thead1);
-  table.appendChild(thead2);
+      table.appendChild(thead1);
+      table.appendChild(thead2);
 
-  function valueForCell(mode, c, s){
-    const ovr = getOverride(mode, c, s);
-    if(ovr) return { target: ovr.target, actual: ovr.actual, source:'manual' };
+      function valueForCell(mode, c, s){
+        const ovr = getOverride(mode, c, s);
+        if(ovr) return { target: ovr.target, actual: ovr.actual, source:'manual' };
 
-    const rec = getLatestByCell(mode, c, s);
-    if(rec) return { target: rec.target, actual: rec.correct, source:'auto' };
+        const rec = getLatestByCell(mode, c, s);
+        if(rec) return { target: rec.target, actual: rec.correct, source:'auto' };
 
-    return { target:'', actual:'', source:'none' };
-  }
+        return { target:'', actual:'', source:'none' };
+      }
 
-  function tdValue(v){
-    if(v === '' || v == null || Number.isNaN(v)) return '<span class="mutedCell">—</span>';
-    return String(v);
-  }
+      function tdValue(v){
+        if(v === '' || v == null || Number.isNaN(v)) return '<span class="mutedCell">—</span>';
+        return String(v);
+      }
 
-  function mkInputCell(mode, c, s, field, val){
-    const td = document.createElement('td');
+      function mkInputCell(mode, c, s, field, val){
+        const td = document.createElement('td');
 
-    if(!unlocked){
-      td.innerHTML = tdValue(val);
-      return td;
+        if(!unlocked){
+          td.innerHTML = tdValue(val);
+          return td;
+        }
+
+        const inp = document.createElement('input');
+        inp.type = 'number';
+        inp.min = '0';
+        inp.value = (val === '' || val == null) ? '' : String(val);
+        inp.style.width = '88px';
+        inp.style.padding = '6px 8px';
+        inp.style.borderRadius = '10px';
+        inp.style.border = '1px solid var(--line)';
+        inp.style.fontWeight = '900';
+        inp.style.background = 'var(--paper)';
+        inp.style.textAlign = 'center';
+
+        inp.addEventListener('change', ()=>{
+          const cur = valueForCell(mode, c, s);
+          const newVal = inp.value === '' ? '' : Number(inp.value);
+          const target = (field === 'target') ? newVal : cur.target;
+          const actual = (field === 'actual') ? newVal : cur.actual;
+          setOverride(mode, c, s, target, actual);
+          status(`Saved manual chart edit: ${mode} ${makeSessionId(c,s)} (T=${target}, A=${actual})`);
+          renderChart();
+        });
+
+        td.appendChild(inp);
+        return td;
+      }
+
+      function buildRow(modeLabel, modeCode, c){
+        const tr = document.createElement('tr');
+        tr.innerHTML = (modeLabel === 'P')
+          ? `<td class="left" rowspan="3"><b>Cycle ${c}</b></td><td class="typeCell">${modeLabel}</td>`
+          : `<td class="typeCell">${modeLabel}</td>`;
+
+        for(let s=1; s<=SESSIONS_PER_CYCLE; s++){
+          const v = valueForCell(modeCode, c, s);
+          tr.appendChild(mkInputCell(modeCode, c, s, 'target', v.target));
+          tr.appendChild(mkInputCell(modeCode, c, s, 'actual', v.actual));
+        }
+        return tr;
+      }
+
+      for(let c=1;c<=TOTAL_CYCLES;c++){
+        table.appendChild(buildRow('P', 'P', c));
+        table.appendChild(buildRow('HFW', 'HFW', c));
+        table.appendChild(buildRow('Words', 'W', c));
+      }
+
+      chartWrap.innerHTML = '';
+      chartWrap.appendChild(table);
     }
-
-    const inp = document.createElement('input');
-    inp.type = 'number';
-    inp.min = '0';
-    inp.value = (val === '' || val == null) ? '' : String(val);
-    inp.style.width = '88px';
-    inp.style.padding = '6px 8px';
-    inp.style.borderRadius = '10px';
-    inp.style.border = '1px solid var(--line)';
-    inp.style.fontWeight = '900';
-    inp.style.background = 'var(--paper)';
-    inp.style.textAlign = 'center';
-
-    inp.addEventListener('change', ()=>{
-      const cur = valueForCell(mode, c, s);
-      const newVal = inp.value === '' ? '' : Number(inp.value);
-      const target = (field === 'target') ? newVal : cur.target;
-      const actual = (field === 'actual') ? newVal : cur.actual;
-      setOverride(mode, c, s, target, actual);
-      status(`Saved manual chart edit: ${mode} ${makeSessionId(c,s)} (T=${target}, A=${actual})`);
-      // re-render to show any style changes if you add later
-      renderChart();
-    });
-
-    td.appendChild(inp);
-    return td;
-  }
-
-  function buildRow(modeLabel, modeCode, c){
-    const tr = document.createElement('tr');
-    tr.innerHTML = (modeLabel === 'P')
-      ? `<td class="left" rowspan="3"><b>Cycle ${c}</b></td><td class="typeCell">${modeLabel}</td>`
-      : `<td class="typeCell">${modeLabel}</td>`;
-
-    for(let s=1; s<=SESSIONS_PER_CYCLE; s++){
-      const v = valueForCell(modeCode, c, s);
-      tr.appendChild(mkInputCell(modeCode, c, s, 'target', v.target));
-      tr.appendChild(mkInputCell(modeCode, c, s, 'actual', v.actual));
-    }
-    return tr;
-  }
-
-  for(let c=1;c<=TOTAL_CYCLES;c++){
-    const trP = buildRow('P', 'P', c);
-    const trH = buildRow('HFW', 'HFW', c);
-    const trW = buildRow('Words', 'W', c);
-    table.appendChild(trP);
-    table.appendChild(trH);
-    table.appendChild(trW);
-  }
-
-  chartWrap.innerHTML = '';
-  chartWrap.appendChild(table);
-}
 
     function fmtTime(ts){
       const d = new Date(ts);
@@ -2428,12 +2378,8 @@ function clearAllOverrides(){
     let DAY = null;
 
     function getDayList(kind, sid){
-      if(kind === 'P'){
-        return (P_MAP[sid] || []).slice();
-      }
-      if(kind === 'W'){
-        return (WORD_DB[sid] || []).slice();
-      }
+      if(kind === 'P') return (P_MAP[sid] || []).slice();
+      if(kind === 'W') return (WORD_DB[sid] || []).slice();
       const curr = (HFW_DB && Array.isArray(HFW_DB[sid])) ? HFW_DB[sid] : [];
       const seed = (HFW_SEED && Array.isArray(HFW_SEED[sid])) ? HFW_SEED[sid] : [];
       return (curr.length ? curr : seed).slice();
@@ -2563,7 +2509,6 @@ function clearAllOverrides(){
     let tickId = 0;
     let paused = false;
     let pauseStartedAt = 0;
-    let totalPausedMs = 0;
 
     function mmss(sec){
       const s = Math.max(0, sec|0);
@@ -2758,7 +2703,6 @@ function clearAllOverrides(){
         endsAt: timed ? (Date.now() + DASH_SECONDS*1000) : Infinity,
       };
       paused = false;
-      totalPausedMs = 0;
       pauseStartedAt = 0;
 
       updateKpi();
@@ -2830,7 +2774,6 @@ function clearAllOverrides(){
       } else {
         pauseBtn.textContent = 'Pause';
         const pausedMs = Date.now() - pauseStartedAt;
-        totalPausedMs += pausedMs;
         DASH.endsAt += pausedMs;
         status('Resumed.');
       }
@@ -2999,35 +2942,33 @@ function clearAllOverrides(){
       URL.revokeObjectURL(url);
     }
 
-   exportBtn.addEventListener('click', ()=>{
-  // Build snapshot = exactly what is shown on chart now
-  const snapshot = {};
-  for(let c=1;c<=TOTAL_CYCLES;c++){
-    for(let s=1;s<=SESSIONS_PER_CYCLE;s++){
-      const sid = makeSessionId(c,s);
-      snapshot[sid] = snapshot[sid] || {};
-      ['P','HFW','W'].forEach(mode=>{
-        const ovr = getOverride(mode, c, s);
-        const rec = getLatestByCell(mode, c, s);
-        snapshot[sid][mode] = {
-          target: ovr ? ovr.target : (rec ? rec.target : ''),
-          actual: ovr ? ovr.actual : (rec ? rec.correct : ''),
-          source: ovr ? 'manual' : (rec ? 'auto' : 'none')
-        };
-      });
-    }
-  }
+    exportBtn.addEventListener('click', ()=>{
+      const snapshot = {};
+      for(let c=1;c<=TOTAL_CYCLES;c++){
+        for(let s=1;s<=SESSIONS_PER_CYCLE;s++){
+          const sid = makeSessionId(c,s);
+          snapshot[sid] = snapshot[sid] || {};
+          ['P','HFW','W'].forEach(mode=>{
+            const ovr = getOverride(mode, c, s);
+            const rec = getLatestByCell(mode, c, s);
+            snapshot[sid][mode] = {
+              target: ovr ? ovr.target : (rec ? rec.target : ''),
+              actual: ovr ? ovr.actual : (rec ? rec.correct : ''),
+              source: ovr ? 'manual' : (rec ? 'auto' : 'none')
+            };
+          });
+        }
+      }
 
-  const payload = {
-    exportedAt: new Date().toISOString(),
-    records: RECORDS,
-    hfwDb: HFW_DB,
-    chartOverrides: CHART_OVR,
-    chartSnapshot: snapshot
-  };
-  downloadJSON(payload, `one-minute-dash-records-${Date.now()}.json`);
-});
-
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        records: RECORDS,
+        hfwDb: HFW_DB,
+        chartOverrides: CHART_OVR,
+        chartSnapshot: snapshot
+      };
+      downloadJSON(payload, `one-minute-dash-records-${Date.now()}.json`);
+    });
 
     importBtn.addEventListener('click', ()=> importFile.click());
 
@@ -3041,9 +2982,8 @@ function clearAllOverrides(){
         const obj = JSON.parse(text);
 
         const incomingRecords = Array.isArray(obj.records) ? obj.records : [];
-const incomingHfw = (obj.hfwDb && typeof obj.hfwDb === 'object') ? obj.hfwDb : {};
-const incomingOverrides = (obj.chartOverrides && typeof obj.chartOverrides === 'object') ? obj.chartOverrides : null;
-
+        const incomingHfw = (obj.hfwDb && typeof obj.hfwDb === 'object') ? obj.hfwDb : {};
+        const incomingOverrides = (obj.chartOverrides && typeof obj.chartOverrides === 'object') ? obj.chartOverrides : null;
 
         const byId = new Map(RECORDS.map(r=> [r.id, r]));
         incomingRecords.forEach(r=>{
@@ -3055,9 +2995,10 @@ const incomingOverrides = (obj.chartOverrides && typeof obj.chartOverrides === '
 
         HFW_DB = { ...(HFW_DB||{}), ...(incomingHfw||{}) };
         saveHfwDb(HFW_DB);
+
         if(incomingOverrides){
-        CHART_OVR = { ...(CHART_OVR||{}), ...(incomingOverrides||{}) };
-        saveChartOverrides(CHART_OVR);
+          CHART_OVR = { ...(CHART_OVR||{}), ...(incomingOverrides||{}) };
+          saveChartOverrides(CHART_OVR);
         }
 
         status('Imported JSON successfully.');
@@ -3081,34 +3022,35 @@ const incomingOverrides = (obj.chartOverrides && typeof obj.chartOverrides === '
       renderChart();
       renderHistory();
     });
-if(unlockChartBtn){
-  unlockChartBtn.addEventListener('click', ()=>{
-    const pw = prompt('Enter password to unlock chart editing:');
-    if(pw === '0000'){
-      setChartUnlocked(true);
-      status('Chart unlocked. You can edit targets/actuals directly in the table.');
-      renderChart();
-    } else {
-      alert('Wrong password.');
+
+    if(unlockChartBtn){
+      unlockChartBtn.addEventListener('click', ()=>{
+        const pw = prompt('Enter password to unlock chart editing:');
+        if(pw === '0000'){
+          setChartUnlocked(true);
+          status('Chart unlocked. You can edit targets/actuals directly in the table.');
+          renderChart();
+        } else {
+          alert('Wrong password.');
+        }
+      });
     }
-  });
-}
-if(lockChartBtn){
-  lockChartBtn.addEventListener('click', ()=>{
-    setChartUnlocked(false);
-    status('Chart locked.');
-    renderChart();
-  });
-}
-if(clearOverridesBtn){
-  clearOverridesBtn.addEventListener('click', ()=>{
-    const ok = confirm('Clear ALL manual chart edits? (Auto values from timed records will still remain.)');
-    if(!ok) return;
-    clearAllOverrides();
-    status('Manual chart edits cleared.');
-    renderChart();
-  });
-}
+    if(lockChartBtn){
+      lockChartBtn.addEventListener('click', ()=>{
+        setChartUnlocked(false);
+        status('Chart locked.');
+        renderChart();
+      });
+    }
+    if(clearOverridesBtn){
+      clearOverridesBtn.addEventListener('click', ()=>{
+        const ok = confirm('Clear ALL manual chart edits? (Auto values from timed records will still remain.)');
+        if(!ok) return;
+        clearAllOverrides();
+        status('Manual chart edits cleared.');
+        renderChart();
+      });
+    }
 
     resetBtn.addEventListener('click', ()=>{
       const ok = confirm('Reset target lock and refresh scope preview?');
@@ -3137,14 +3079,6 @@ if(clearOverridesBtn){
       updateStartButtonLabel();
     }
 
-    function syncCycleSessionFromAt(){
-      const id = atSelect.value;
-      if(!id) return;
-      const p = parseSessionId(id);
-      if(p.cycle) cycleSel.value = String(p.cycle);
-      if(p.session) sessSel.value = String(p.session);
-    }
-
     init();
 
     window.addEventListener('load', () => {
@@ -3158,12 +3092,3 @@ if(clearOverridesBtn){
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
