@@ -1504,19 +1504,31 @@ function clearAllOverrides(){
     }
 
     function markOpenSyllableEnd(s, marks){
-      const w = s.toLowerCase();
-      if(w.length < 2) return;
-      const last = w[w.length-1];
-      if("aeiouy".includes(last)){
-        if(last === 'e'){
-          if(w.length <= 3 && !shouldMagicE(w) && !w.endsWith("le")){
-            marks[w.length-1] = true;
-          }
-          return;
-        }
-        marks[w.length-1] = true;
-      }
+  const w = s.toLowerCase();
+
+  for(let i = 0; i < w.length - 2; i++){
+
+    // pattern: vowel + consonant + vowel
+    if(
+      isVowelChar(w[i]) &&
+      !isVowelChar(w[i+1]) &&
+      isVowelChar(w[i+2])
+    ){
+      marks[i] = true;      // first vowel (e in hero)
+      marks[i+2] = true;    // second vowel (o in hero)
     }
+  }
+
+  // also mark final open vowel (CV ending)
+  if(
+    w.length >= 2 &&
+    !isVowelChar(w[w.length-2]) &&
+    isVowelChar(w[w.length-1])
+  ){
+    marks[w.length-1] = true;
+  }
+}
+
 
     function markShortVowelsClosed(s, marks){
       const w = s.toLowerCase();
@@ -1620,10 +1632,10 @@ function clearAllOverrides(){
           continue;
         }
 
-        let cls = 'cons';
-        if(vowelMarks[i]) cls = 'vowel';
-        if(prefMarks[i])  cls = 'pre';
-        if(sufMarks[i])   cls = 'suf';
+       let cls = 'cons';
+       if(prefMarks[i])  cls = 'pre';
+       if(sufMarks[i])   cls = 'suf';
+       if(vowelMarks[i]) cls = 'vowel'; // vowel last
         out += `<span class="${cls}">${ch}</span>`;
       }
       return out;
@@ -3142,6 +3154,7 @@ if(clearOverridesBtn){
   </script>
 </body>
 </html>
+
 
 
 
