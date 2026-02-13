@@ -1473,17 +1473,23 @@ function clearAllOverrides(){
       });
     }
 
-    function markRControlled(s, marks){
-      const w = s.toLowerCase();
-      R_CONTROLLED.forEach(pat=>{
-        for(let i=0;i<=w.length-2;i++){
-          if(w.slice(i,i+2) === pat){
-            marks[i] = true;
-            marks[i+1] = true;
-          }
-        }
-      });
+   function markRControlled(s, marks){
+  const w = s.toLowerCase();
+  R_CONTROLLED.forEach(pat=>{
+    for(let i=0;i<=w.length-2;i++){
+      if(w.slice(i,i+2) !== pat) continue;
+
+      // ✅ If the 'r' is followed by a vowel, treat r as consonant starting next syllable
+      // e.g., he-ro, ze-ro => "er" is NOT r-controlled here; keep 'r' black
+      const after = w[i+2];
+      if(after && isVowelChar(after)) continue;
+
+      marks[i] = true;     // vowel
+      marks[i+1] = true;   // r
     }
+  });
+}
+
 
     function markConsonantLE(s, marks){
       const w = s.toLowerCase();
@@ -1503,23 +1509,23 @@ function clearAllOverrides(){
       marks[n-1] = true;
     }
 
-    function markOpenSyllableEnd(s, marks){
+   function markOpenSyllableEnd(s, marks){
   const w = s.toLowerCase();
 
+  // V-C-V: mark ONLY the first vowel as long (open syllable)
+  // e.g., h e r o -> mark 'e' (not 'o' here)
   for(let i = 0; i < w.length - 2; i++){
-
-    // pattern: vowel + consonant + vowel
     if(
       isVowelChar(w[i]) &&
       !isVowelChar(w[i+1]) &&
       isVowelChar(w[i+2])
     ){
-      marks[i] = true;      // first vowel (e in hero)
-      marks[i+2] = true;    // second vowel (o in hero)
+      marks[i] = true;
     }
   }
 
-  // also mark final open vowel (CV ending)
+  // final open vowel (ends with consonant + vowel): mark last vowel
+  // e.g., hero -> mark final 'o'; zero -> mark final 'o'
   if(
     w.length >= 2 &&
     !isVowelChar(w[w.length-2]) &&
@@ -1528,32 +1534,6 @@ function clearAllOverrides(){
     marks[w.length-1] = true;
   }
 }
-
-
-   function markShortVowelsClosed(s, marks){
-  const w = s.toLowerCase();
-
-  for(let i = 0; i < w.length; i++){
-
-    // only process if NOT already marked long
-    if(marks[i]) continue;
-
-    if(
-      isVowelChar(w[i]) &&
-
-      // vowel + consonant + (end OR consonant)
-      i+1 < w.length &&
-      !isVowelChar(w[i+1]) &&
-
-      ( i+2 >= w.length || !isVowelChar(w[i+2]) )
-    ){
-      // short vowel, leave as black
-      // do NOTHING, just don't override
-      continue;
-    }
-  }
-}
-
 
     function markYVowel(s, marks){
       const w = s.toLowerCase();
@@ -3172,6 +3152,7 @@ if(clearOverridesBtn){
   </script>
 </body>
 </html>
+
 
 
 
