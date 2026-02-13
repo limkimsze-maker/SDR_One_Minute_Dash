@@ -1473,21 +1473,27 @@ function clearAllOverrides(){
       });
     }
 
-   function markRControlled(s, marks){
+  function markRControlled(s, marks){
   const w = s.toLowerCase();
-  R_CONTROLLED.forEach(pat=>{
+
+  for(const pat of R_CONTROLLED){
     for(let i=0;i<=w.length-2;i++){
       if(w.slice(i,i+2) !== pat) continue;
 
-      // ✅ If the 'r' is followed by a vowel, treat r as consonant starting next syllable
-      // e.g., he-ro, ze-ro => "er" is NOT r-controlled here; keep 'r' black
       const after = w[i+2];
+
+      // If 'r' is followed by a vowel, treat r as consonant starting next syllable
+      // hero, zero, syrup-like splits, etc.
       if(after && isVowelChar(after)) continue;
 
-      marks[i] = true;     // vowel
-      marks[i+1] = true;   // r
+      // If the pair is at the start of the word (e.g., "er..." as in "erase"),
+      // also NOT r-controlled for your classroom colouring purpose.
+      if(i === 0) continue;
+
+      marks[i] = true;
+      marks[i+1] = true;
     }
-  });
+  }
 }
 
 
@@ -3152,6 +3158,7 @@ if(clearOverridesBtn){
   </script>
 </body>
 </html>
+
 
 
 
