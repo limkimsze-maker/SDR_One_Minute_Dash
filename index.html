@@ -1530,25 +1530,30 @@ function clearAllOverrides(){
 }
 
 
-    function markShortVowelsClosed(s, marks){
-      const w = s.toLowerCase();
-      for(let i=0;i<w.length;i++){
-        const ch = w[i];
-        if(!isVowelChar(ch)) continue;
-        if(marks[i]) continue;
+   function markShortVowelsClosed(s, marks){
+  const w = s.toLowerCase();
 
-        const next = w[i+1];
-        if(!next) continue;
-        if(isVowelChar(next)) continue;
-        if(next === 'r') continue;
+  for(let i = 0; i < w.length; i++){
 
-        const next2 = w[i+2];
-        if(!next2 || (!isVowelChar(next2))){
-          if(i === w.length-3 && w.endsWith('e') && shouldMagicE(w)) continue;
-          marks[i] = true;
-        }
-      }
+    // only process if NOT already marked long
+    if(marks[i]) continue;
+
+    if(
+      isVowelChar(w[i]) &&
+
+      // vowel + consonant + (end OR consonant)
+      i+1 < w.length &&
+      !isVowelChar(w[i+1]) &&
+
+      ( i+2 >= w.length || !isVowelChar(w[i+2]) )
+    ){
+      // short vowel, leave as black
+      // do NOTHING, just don't override
+      continue;
     }
+  }
+}
+
 
     function markYVowel(s, marks){
       const w = s.toLowerCase();
@@ -3154,6 +3159,7 @@ if(clearOverridesBtn){
   </script>
 </body>
 </html>
+
 
 
 
