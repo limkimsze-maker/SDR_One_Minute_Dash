@@ -1614,13 +1614,25 @@ function clearAllOverrides(){
       const prefMarks  = new Array(s.length).fill(false);
       const sufMarks   = new Array(s.length).fill(false);
 
-      markAllPatterns(...)
-markRControlled(...)
-markMagicE(...)
-markConsonantLE(...)
-markOpenSyllableEnd(...)   // BEFORE short vowels
-markYVowel(...)
-markShortVowelsClosed(...) // LAST
+            // 1) vowel teams + special patterns
+      markAllPatterns(w, TEAM_PATTERNS, vowelMarks);
+
+      // 2) r-controlled (ar/or/ir/er/ur)
+      markRControlled(w, vowelMarks);
+
+      // 3) magic-e and consonant-le
+      markMagicE(w, vowelMarks);
+      markConsonantLE(w, vowelMarks);
+
+      // 4) open syllable (V-C-V and final open vowel)
+      markOpenSyllableEnd(w, vowelMarks);
+
+      // 5) y as vowel (end-of-word / syllable)
+      markYVowel(w, vowelMarks);
+
+      // 6) short vowels closed — MUST be last and MUST NOT override long marks
+      markShortVowelsClosed(w, vowelMarks);
+
 
 
       markPrefixBySid(w, sid, prefMarks);
@@ -3160,6 +3172,7 @@ if(clearOverridesBtn){
   </script>
 </body>
 </html>
+
 
 
 
