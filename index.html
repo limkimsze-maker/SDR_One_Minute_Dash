@@ -1302,6 +1302,10 @@ th.left, td.left{
 
     function toggleSound(){ setSound(!SOUND_ON); }
     soundToggle.addEventListener('click', toggleSound);
+    // ✅ Mobile TTS unlock (must happen on user tap)
+soundToggle.addEventListener('click', ()=>{
+  if(SOUND_ON) unlockSpeech();
+});
     soundToggle.addEventListener('keydown', (e)=>{
       if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleSound(); }
     });
@@ -1333,17 +1337,67 @@ th.left, td.left{
       return false;
     }
 
-    function speak(text){
-      try{
-        const synth = window.speechSynthesis;
-        if(!synth) return;
-        const utter = new SpeechSynthesisUtterance(String(text));
-        utter.rate = 0.95;
-        utter.pitch = 1.0;
-        synth.cancel();
-        synth.speak(utter);
-      }catch(e){}
-    }
+    let SPEECH_UNLOCKED = false;
+let SPEECH_VOICE = null;
+
+function pickVoice(){
+  const synth = window.speechSynthesis;
+  if(!synth) return null;
+  const voices = synth.getVoices ? synth.getVoices() : [];
+  if(!voices || !voices.length) return null;
+  const en = voices.find(v => /en/i.test(v.lang)) || voices[0];
+  return en || null;
+}
+
+function unlockSpeech(){
+  try{
+    const synth = window.speechSynthesis;
+    if(!synth) return false;
+
+    SPEECH_VOICE = pickVoice();
+
+    const u = new SpeechSynthesisUtterance(' ');
+    u.volume = 0;   // keep it silent
+    u.rate = 1;
+    u.pitch = 1;
+    if(SPEECH_VOICE) u.voice = SPEECH_VOICE;
+
+    synth.cancel();
+    synth.speak(u);
+
+    SPEECH_UNLOCKED = true;
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+function speak(text){
+  try{
+    const synth = window.speechSynthesis;
+    if(!synth) return;
+
+    // stop HTML audio to reduce conflicts
+    const player = document.getElementById('player');
+    if(player){ try{ player.pause(); }catch(e){} }
+
+    if(!SPEECH_VOICE) SPEECH_VOICE = pickVoice();
+
+    const utter = new SpeechSynthesisUtterance(String(text));
+    utter.rate = 0.95;
+    utter.pitch = 1.0;
+    if(SPEECH_VOICE) utter.voice = SPEECH_VOICE;
+
+    synth.cancel();
+    synth.speak(utter);
+  }catch(e){}
+}
+
+if('speechSynthesis' in window){
+  window.speechSynthesis.onvoiceschanged = ()=>{
+    SPEECH_VOICE = pickVoice() || SPEECH_VOICE;
+  };
+}
 
     async function playPhonogramSound(item){
       const name = sanitizePhonogramName(item);
@@ -3096,4 +3150,5 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
   </script>
 </body>
 </html>
+
 
