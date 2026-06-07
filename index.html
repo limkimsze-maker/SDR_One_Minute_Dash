@@ -403,6 +403,35 @@
     }
     .bigItem .sp{ width:12px; display:inline-block; }
 
+
+    /* One Minute Dash phonogram card: small blue multi-sound label */
+    .phonCard{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      width:100%;
+      min-height:1.15em;
+    }
+    .phonMain{
+      font-size:inherit;
+      font-weight:inherit;
+      line-height:.95;
+      color:#000;
+    }
+    .phonSub{
+      font-size:18px;
+      line-height:1.1;
+      font-weight:1000;
+      color:#2563eb;
+      letter-spacing:.2px;
+      text-transform:lowercase;
+    }
+    .review-card .phonSub{
+      font-size:14px;
+    }
+
     .bigItem.hasSid{
       display:block;
       position:relative;
@@ -1323,16 +1352,172 @@ soundToggle.addEventListener('click', ()=>{
       return String(w).toLowerCase().replace(/[^a-z]/g,'');
     }
 
-    async function playViaPlayer(paths){
+    /*
+      One Minute Dash phonogram logic
+      - Keeps lesson/focus cards separated.
+      - In One Minute Dash, shows "2 sounds" / "3 sounds" only after the relevant sounds have been taught.
+      - Where sounds are stored as separate files, the files are played back-to-back.
+      - Per current teaching decision: ea remains 2 sounds; -s/-es are not labelled 3 sounds.
+    */
+    const MULTI_SOUND_PHONOGRAM_RULES = {
+      // Single vowels: taught as two sounds from the start in this programme.
+      "a":  { label:"a",  gate:"C1S1", count:2, audioBefore:["a"],  audioAfter:["a"] },
+      "e":  { label:"e",  gate:"C1S1", count:2, audioBefore:["e"],  audioAfter:["e"] },
+      "i":  { label:"i",  gate:"C1S1", count:2, audioBefore:["i"],  audioAfter:["i"] },
+      "o":  { label:"o",  gate:"C1S1", count:2, audioBefore:["o"],  audioAfter:["o"] },
+      "u":  { label:"u",  gate:"C1S1", count:2, audioBefore:["u"],  audioAfter:["u"] },
+
+      // Consonant letters with a second taught sound later.
+      "c":      { label:"c", gate:"C8S1", count:2, group:"c", audioBefore:["c-hard"], audioAfter:["c-hard","c-soft"] },
+      "c-hard": { label:"c", gate:"C8S1", count:2, group:"c", audioBefore:["c-hard"], audioAfter:["c-hard","c-soft"] },
+      "c-soft": { label:"c", gate:"C8S1", count:2, group:"c", audioBefore:["c-soft"], audioAfter:["c-hard","c-soft"] },
+
+      "g":      { label:"g", gate:"C8S1", count:2, group:"g", audioBefore:["g-hard"], audioAfter:["g-hard","g-soft"] },
+      "g-hard": { label:"g", gate:"C8S1", count:2, group:"g", audioBefore:["g-hard"], audioAfter:["g-hard","g-soft"] },
+      "g-soft": { label:"g", gate:"C8S1", count:2, group:"g", audioBefore:["g-soft"], audioAfter:["g-hard","g-soft"] },
+
+      // y: consonant /y/ first, then vowel-y sounds after C7S2.
+      // Label as 3 sounds once all y sounds in this programme have been taught.
+      "y":       { label:"y", gate:"C7S2", count:3, group:"y", audioBefore:["y"],       audioAfter:["y","y-vowel"] },
+      "y-vowel": { label:"y", gate:"C7S2", count:3, group:"y", audioBefore:["y-vowel"], audioAfter:["y","y-vowel"] },
+
+      // Vowel teams with two taught sounds.
+      // User decision: keep ea as 2 sounds from C9S2.
+      "ea":          { label:"ea", gate:"C9S2", count:2, group:"ea", audioBefore:["ea"],          audioAfter:["ea-short-e","ea"] },
+      "ea-short-e":  { label:"ea", gate:"C9S2", count:2, group:"ea", audioBefore:["ea-short-e"],  audioAfter:["ea-short-e","ea"] },
+
+      "ie": { label:"ie", gate:"C9S3",  count:2, audioBefore:["ie"], audioAfter:["ie"] },
+      "ei": { label:"ei", gate:"C10S1", count:2, audioBefore:["ei"], audioAfter:["ei"] },
+      "ey": { label:"ey", gate:"C10S2", count:2, audioBefore:["ey"], audioAfter:["ey"] },
+      "oo": { label:"oo", gate:"C11S2", count:2, audioBefore:["oo"], audioAfter:["oo"] },
+
+      "ue":    { label:"ue", gate:"C12S1", count:2, group:"ue", audioBefore:["ue"],    audioAfter:["ue","ue-u"] },
+      "ue-u":  { label:"ue", gate:"C12S1", count:2, group:"ue", audioBefore:["ue-u"],  audioAfter:["ue","ue-u"] },
+
+      "ew":    { label:"ew", gate:"C12S1", count:2, group:"ew", audioBefore:["ew"],    audioAfter:["ew","ew-u"] },
+      "ew-u":  { label:"ew", gate:"C12S1", count:2, group:"ew", audioBefore:["ew-u"],  audioAfter:["ew","ew-u"] },
+
+      "ow":        { label:"ow", gate:"C13S1", count:2, group:"ow", audioBefore:["ow"],        audioAfter:["ow-long-o","ow"] },
+      "ow-long-o": { label:"ow", gate:"C13S1", count:2, group:"ow", audioBefore:["ow-long-o"], audioAfter:["ow-long-o","ow"] },
+
+      // Common digraph: th has voiced and unvoiced sounds; taught when th is introduced.
+      "th": { label:"th", gate:"C1S2", count:2, audioBefore:["th"], audioAfter:["th"] },
+
+      // Past tense suffix -ed has three pronunciations: /t/, /d/, /id/.
+      "-ed": { label:"-ed", gate:"C16S2", count:3, audioBefore:["-ed"], audioAfter:["-ed"] }
+    };
+
+    function escapeHTML(s){
+      return String(s ?? '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+    }
+
+    function sessionOrderIndex(id){
+      return SESSION_ORDER.indexOf(String(id || ''));
+    }
+
+    function isAtOrAfterSession(currentSid, gateSid){
+      const a = sessionOrderIndex(currentSid);
+      const b = sessionOrderIndex(gateSid);
+      return a >= 0 && b >= 0 && a >= b;
+    }
+
+    function phonogramRule(item){
+      return MULTI_SOUND_PHONOGRAM_RULES[String(item || '')] || null;
+    }
+
+    function phonogramDisplayLabel(item){
+      const rule = phonogramRule(item);
+      return rule?.label || String(item || '');
+    }
+
+    function phonogramSoundCountNow(item, currentSid){
+      const rule = phonogramRule(item);
+      if(!rule || !rule.gate || !isAtOrAfterSession(currentSid, rule.gate)) return 1;
+      return Math.max(1, Number(rule.count || 2));
+    }
+
+    function phonogramHasTwoSoundsNow(item, currentSid){
+      return phonogramSoundCountNow(item, currentSid) >= 2;
+    }
+
+    function phonogramAudioKeys(item, currentSid){
+      const rule = phonogramRule(item);
+      if(!rule) return [String(item || '')];
+      if(phonogramHasTwoSoundsNow(item, currentSid) && Array.isArray(rule.audioAfter)) return rule.audioAfter.slice();
+      if(Array.isArray(rule.audioBefore)) return rule.audioBefore.slice();
+      return [phonogramDisplayLabel(item)];
+    }
+
+    function renderPhonogramCardHTML(item, currentSid){
+      const label = phonogramDisplayLabel(item);
+      const count = phonogramSoundCountNow(item, currentSid);
+      return `<div class="phonCard"><div class="phonMain">${escapeHTML(label)}</div>${count >= 2 ? `<div class="phonSub">${count} sounds</div>` : ``}</div>`;
+    }
+
+    function collapseTwoSoundPhonogramsForDash(items, upToId){
+      const out = [];
+      const seen = new Set();
+      const emittedGroups = new Set();
+
+      (items || []).forEach(item=>{
+        const raw = String(item || '');
+        const rule = phonogramRule(raw);
+
+        if(rule?.group && phonogramHasTwoSoundsNow(raw, upToId)){
+          const group = rule.group;
+          if(!emittedGroups.has(group)){
+            out.push(group);
+            emittedGroups.add(group);
+            seen.add(group);
+          }
+          return;
+        }
+
+        if(!seen.has(raw)){
+          out.push(raw);
+          seen.add(raw);
+        }
+      });
+
+      return out;
+    }
+
+    function tryPlayOnePath(path){
       const player = document.getElementById('player');
-      for(const p of paths){
+      if(!player || !path) return Promise.resolve(false);
+
+      return new Promise(resolve=>{
+        let done = false;
+        const finish = (ok)=>{
+          if(done) return;
+          done = true;
+          player.removeEventListener('ended', onEnded);
+          player.removeEventListener('error', onError);
+          resolve(!!ok);
+        };
+        const onEnded = ()=> finish(true);
+        const onError = ()=> finish(false);
+
         try{
           player.pause();
           player.currentTime = 0;
-          player.src = p;
-          await player.play();
-          return true;
-        }catch(e){}
+          player.src = path;
+          player.addEventListener('ended', onEnded, { once:true });
+          player.addEventListener('error', onError, { once:true });
+          const maybePromise = player.play();
+          if(maybePromise && typeof maybePromise.catch === 'function'){
+            maybePromise.catch(()=> finish(false));
+          }
+        }catch(e){
+          finish(false);
+        }
+      });
+    }
+
+    async function playViaPlayer(paths){
+      for(const p of paths){
+        const ok = await tryPlayOnePath(p);
+        if(ok) return true;
       }
       return false;
     }
@@ -1399,11 +1584,18 @@ if('speechSynthesis' in window){
   };
 }
 
-    async function playPhonogramSound(item){
-      const name = sanitizePhonogramName(item);
-      const candidates = AUDIO_EXTS.map(ext => `${AUDIO_BASE}${name}.${ext}`);
-      const ok = await playViaPlayer(candidates);
-      if(!ok) speak(item);
+    async function playPhonogramSound(item, currentSid){
+      const keys = phonogramAudioKeys(item, currentSid);
+      let playedAny = false;
+
+      for(const key of keys){
+        const name = sanitizePhonogramName(key);
+        const candidates = AUDIO_EXTS.map(ext => `${AUDIO_BASE}${name}.${ext}`);
+        const ok = await playViaPlayer(candidates);
+        playedAny = playedAny || ok;
+      }
+
+      if(!playedAny) speak(phonogramDisplayLabel(item));
     }
 
     async function playHfwSound(word){
@@ -2027,7 +2219,8 @@ if(focusStartBtn){
         const list = getItemsForSession(sid);
         if(list && list.length) items.push(...list);
       });
-      return uniquePreserve(items);
+      const base = uniquePreserve(items);
+      return (MODE === 'P') ? collapseTwoSoundPhonogramsForDash(base, upToId) : base;
     }
 
     function buildScopeWords3(upToId){
@@ -2270,6 +2463,8 @@ if(focusStartBtn){
         if(mode === 'W'){
           const d = decodeWordItem(x);
           p.innerHTML = renderWordWithSidHTML(d.sid, d.word, true);
+        } else if(mode === 'P'){
+          p.textContent = phonogramDisplayLabel(x);
         } else {
           p.textContent = x;
         }
@@ -2581,8 +2776,9 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
     }
 
     function readableListForFeedback(mode, arr){
-      if(mode !== 'W') return (arr||[]).join(', ');
-      return (arr||[]).map(x=>decodeWordItem(x).word).join(', ');
+      if(mode === 'W') return (arr||[]).map(x=>decodeWordItem(x).word).join(', ');
+      if(mode === 'P') return (arr||[]).map(x=>phonogramDisplayLabel(x)).join(', ');
+      return (arr||[]).join(', ');
     }
 
     function buildFeedback(rec){
@@ -2616,6 +2812,10 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
         const d = decodeWordItem(it);
         dashItem.innerHTML = renderWordWithSidHTML(d.sid, d.word, false);
         autoFitWordBox(dashItem, 22);
+      } else if(DASH.mode === 'P'){
+        dashItem.classList.remove('hasSid');
+        dashItem.style.fontSize = '';
+        dashItem.innerHTML = renderPhonogramCardHTML(it, DASH.at);
       } else {
         dashItem.classList.remove('hasSid');
         dashItem.style.fontSize = '';
@@ -2627,7 +2827,7 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
       dashProgress.textContent = `Item ${Math.min(DASH.idx+1, DASH.scopeSize)} of ${DASH.scopeSize}`;
 
       if(SOUND_ON){
-        if(DASH.mode === 'P') playPhonogramSound(it);
+        if(DASH.mode === 'P') playPhonogramSound(it, DASH.at);
         else if(DASH.mode === 'HFW') playHfwSound(it);
         else speak(decodeWordItem(it).word);
       }
@@ -2808,7 +3008,7 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
       if(!DASH) return;
       const it = currentItem();
       if(!it) return;
-      if(DASH.mode === 'P') playPhonogramSound(it);
+      if(DASH.mode === 'P') playPhonogramSound(it, DASH.at);
       else if(DASH.mode === 'HFW') playHfwSound(it);
       else speak(decodeWordItem(it).word);
     });
@@ -2862,6 +3062,9 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
           const d = decodeWordItem(item);
           big.classList.add('hasSid');
           big.innerHTML = renderWordWithSidHTML(d.sid, d.word, false);
+        } else if(rec.mode === 'P'){
+          big.classList.remove('hasSid');
+          big.innerHTML = renderPhonogramCardHTML(item, rec.at);
         } else {
           big.textContent = item;
         }
@@ -2875,7 +3078,7 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
         btnMain.style.background = '#06b6d4';
         btnMain.textContent = '🔊 Play';
         btnMain.onclick = ()=>{
-          if(rec.mode === 'P') playPhonogramSound(item);
+          if(rec.mode === 'P') playPhonogramSound(item, rec.at);
           else if(rec.mode === 'HFW') playHfwSound(item);
           else speak(decodeWordItem(item).word);
         };
@@ -2933,6 +3136,10 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
         remainItem.classList.add('hasSid');
         remainItem.innerHTML = renderWordWithSidHTML(d.sid, d.word, false);
         autoFitWordBox(remainItem, 22);
+      } else if(REMAIN.mode === 'P'){
+        remainItem.classList.remove('hasSid');
+        remainItem.style.fontSize = '';
+        remainItem.innerHTML = it ? renderPhonogramCardHTML(it, REMAIN.at) : '—';
       } else {
         remainItem.classList.remove('hasSid');
         remainItem.style.fontSize = '';
@@ -2940,7 +3147,7 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
       }
       remainProg.textContent = `Item ${Math.min(REMAIN.idx+1, REMAIN.list.length)} / ${REMAIN.list.length}`;
       if(SOUND_ON && it){
-        if(REMAIN.mode === 'P') playPhonogramSound(it);
+        if(REMAIN.mode === 'P') playPhonogramSound(it, REMAIN.at);
         else if(REMAIN.mode === 'HFW') playHfwSound(it);
         else speak(decodeWordItem(it).word);
       }
@@ -2970,7 +3177,7 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
       if(!REMAIN) return;
       const it = REMAIN.list[REMAIN.idx];
       if(!it) return;
-      if(REMAIN.mode === 'P') playPhonogramSound(it);
+      if(REMAIN.mode === 'P') playPhonogramSound(it, REMAIN.at);
       else if(REMAIN.mode === 'HFW') playHfwSound(it);
       else speak(decodeWordItem(it).word);
     });
@@ -3150,5 +3357,4 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
   </script>
 </body>
 </html>
-
 
