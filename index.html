@@ -242,6 +242,13 @@
       gap:8px;
     }
     .btn:active{ transform:translateY(1px); box-shadow: 0 6px 14px rgba(0,0,0,.10); }
+    .btn:disabled{
+      opacity:.48;
+      cursor:not-allowed;
+      transform:none;
+      box-shadow:none;
+      filter:grayscale(.1);
+    }
     .btn.ghost{
       background:var(--paper);
       color:var(--brand);
@@ -326,6 +333,20 @@
     .pill.good{ background:#065f46; }
     .pill.bad{ background:#991b1b; }
     .pill.neutral{ background:#111827; }
+    button.pill{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      font-family:inherit;
+      box-shadow:0 4px 10px rgba(0,0,0,.10);
+    }
+    button.pill:hover{ filter:brightness(1.08); transform:translateY(-1px); }
+    button.pill:active{ transform:translateY(0); }
+    button.pill::after{
+      content:' 🔊';
+      font-size:10px;
+      opacity:.85;
+    }
 
     .vowel{ color:var(--vowel); }
     .cons{ color:#000; }
@@ -943,8 +964,13 @@ th.left, td.left{
 
         <div class="bigItem" id="dashItem">—</div>
 
-        <div class="row-small" style="justify-content:center;">
+        <div class="row-small" style="justify-content:center; gap:10px;">
+          <button class="btn ghost small" id="prevDashBtn" type="button" title="Review the previous item without changing the score" disabled>◀ Previous</button>
           <button class="btn ghost small" id="playBtn" type="button">🔊 Play</button>
+        </div>
+
+        <div class="hint" id="dashReviewHint" style="display:none; margin-top:-4px; text-align:center;">
+          Viewing previous item. Score is locked for fairness.
         </div>
 
         <div class="row-small" style="justify-content:center; gap:12px;">
@@ -1971,6 +1997,8 @@ if('speechSynthesis' in window){
     const yesBtn = document.getElementById('yesBtn');
     const noBtn  = document.getElementById('noBtn');
     const playBtn = document.getElementById('playBtn');
+    const prevDashBtn = document.getElementById('prevDashBtn');
+    const dashReviewHint = document.getElementById('dashReviewHint');
     const pauseBtn = document.getElementById('pauseBtn');
     const backSetupFromDash = document.getElementById('backSetupFromDash');
 
@@ -2457,14 +2485,21 @@ if(focusStartBtn){
 
     function pillList(hostEl, items, cls, mode){
       hostEl.innerHTML = '';
+      const recSid = (LAST_RESULT && LAST_RESULT.at) ? LAST_RESULT.at : currentSessionId();
+
       (items || []).forEach(x=>{
-        const p = document.createElement('div');
+        const p = document.createElement(mode === 'P' ? 'button' : 'div');
         p.className = `pill ${cls||'neutral'}`;
+
         if(mode === 'W'){
           const d = decodeWordItem(x);
           p.innerHTML = renderWordWithSidHTML(d.sid, d.word, true);
         } else if(mode === 'P'){
+          p.type = 'button';
           p.textContent = phonogramDisplayLabel(x);
+          p.title = `Play ${phonogramDisplayLabel(x)}`;
+          p.setAttribute('aria-label', `Play ${phonogramDisplayLabel(x)}`);
+          p.addEventListener('click', ()=> playPhonogramSound(x, recSid));
         } else {
           p.textContent = x;
         }
@@ -2799,11 +2834,61 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
       return DASH && DASH.pool && DASH.pool[DASH.idx];
     }
 
+    function displayedDashItem(){
+      if(!DASH || !DASH.pool) return null;
+      if(DASH.reviewingPrevious && DASH.reviewIdx >= 0){
+        return DASH.pool[DASH.reviewIdx];
+      }
+      return currentItem();
+    }
+
+    function dashAnswerLabel(idx){
+      if(!DASH || !DASH.answers) return '';
+      if(DASH.answers[idx] === true) return 'Correct';
+      if(DASH.answers[idx] === false) return 'Wrong';
+      return 'Not scored';
+    }
+
+    function syncDashReviewControls(){
+      if(!DASH){
+        if(prevDashBtn) prevDashBtn.disabled = true;
+        if(dashReviewHint) dashReviewHint.style.display = 'none';
+        return;
+      }
+
+      if(DASH.reviewingPrevious){
+        if(prevDashBtn){
+          prevDashBtn.disabled = false;
+          prevDashBtn.textContent = 'Current ▶';
+          prevDashBtn.title = 'Return to the current unscored item';
+        }
+        if(dashReviewHint){
+          dashReviewHint.style.display = '';
+          dashReviewHint.textContent = `Viewing previous item ${DASH.reviewIdx + 1}. It was marked ${dashAnswerLabel(DASH.reviewIdx)}. Score is locked for fairness.`;
+        }
+        yesBtn.disabled = true;
+        noBtn.disabled = true;
+        return;
+      }
+
+      if(prevDashBtn){
+        prevDashBtn.disabled = DASH.idx <= 0;
+        prevDashBtn.textContent = '◀ Previous';
+        prevDashBtn.title = DASH.idx <= 0 ? 'No previous item yet' : 'Review the previous item without changing the score';
+      }
+      if(dashReviewHint) dashReviewHint.style.display = 'none';
+      yesBtn.disabled = false;
+      noBtn.disabled = false;
+    }
+
     function showDashItem(){
-      const it = currentItem();
+      const reviewing = !!(DASH && DASH.reviewingPrevious);
+      const idx = reviewing ? DASH.reviewIdx : (DASH ? DASH.idx : -1);
+      const it = displayedDashItem();
       if(!it){
         dashItem.textContent = '—';
         dashProgress.textContent = '—';
+        syncDashReviewControls();
         return;
       }
 
@@ -2824,7 +2909,11 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
 
       const modeLabel = (DASH.mode === 'P') ? 'Phonograms' : (DASH.mode === 'HFW') ? 'High Frequency Words' : 'Words';
       dashMeta.textContent = `${modeLabel} · Selected: ${DASH.at} · Scope size ${DASH.scopeSize} · ${DASH.order === 'random' ? 'Randomised' : 'Sequence'} · ${DASH.timed ? 'Timed 60s' : 'Untimed'}`;
-      dashProgress.textContent = `Item ${Math.min(DASH.idx+1, DASH.scopeSize)} of ${DASH.scopeSize}`;
+      dashProgress.textContent = reviewing
+        ? `Reviewing item ${idx+1} of ${DASH.scopeSize} · Already marked ${dashAnswerLabel(idx)} · Score locked`
+        : `Item ${Math.min(DASH.idx+1, DASH.scopeSize)} of ${DASH.scopeSize}`;
+
+      syncDashReviewControls();
 
       if(SOUND_ON){
         if(DASH.mode === 'P') playPhonogramSound(it, DASH.at);
@@ -2947,6 +3036,9 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
         idx: 0,
         correctList: [],
         wrong: [],
+        answers: Array(pool.length).fill(null),
+        reviewingPrevious: false,
+        reviewIdx: -1,
         timed,
         startedAt: Date.now(),
         endsAt: timed ? (Date.now() + DASH_SECONDS*1000) : Infinity,
@@ -2986,13 +3078,32 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
 
     function answer(correct){
       if(!DASH) return;
+
+      if(DASH.reviewingPrevious){
+        status('This previous item has already been scored. Return to the current item to continue.');
+        return;
+      }
+
       const it = currentItem();
       if(!it) return;
 
+      // Fair scoring rule: each item can be scored once only.
+      if(DASH.answers && DASH.answers[DASH.idx] !== null){
+        status('This item has already been scored. Moving on without changing the score.');
+        DASH.idx++;
+        updateKpi();
+        if(DASH.idx >= DASH.scopeSize) finishDash(false);
+        else showDashItem();
+        return;
+      }
+
+      if(DASH.answers) DASH.answers[DASH.idx] = !!correct;
       if(correct) DASH.correctList.push(it);
       else DASH.wrong.push(it);
 
       DASH.idx++;
+      DASH.reviewingPrevious = false;
+      DASH.reviewIdx = -1;
       updateKpi();
 
       if(DASH.idx >= DASH.scopeSize){
@@ -3006,11 +3117,32 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
     noBtn.addEventListener('click',  ()=> answer(false));
     playBtn.addEventListener('click', ()=>{
       if(!DASH) return;
-      const it = currentItem();
+      const it = displayedDashItem();
       if(!it) return;
       if(DASH.mode === 'P') playPhonogramSound(it, DASH.at);
       else if(DASH.mode === 'HFW') playHfwSound(it);
       else speak(decodeWordItem(it).word);
+    });
+
+    prevDashBtn.addEventListener('click', ()=>{
+      if(!DASH) return;
+
+      if(DASH.reviewingPrevious){
+        DASH.reviewingPrevious = false;
+        DASH.reviewIdx = -1;
+        showDashItem();
+        return;
+      }
+
+      if(DASH.idx <= 0){
+        status('No previous item yet.');
+        syncDashReviewControls();
+        return;
+      }
+
+      DASH.reviewingPrevious = true;
+      DASH.reviewIdx = DASH.idx - 1;
+      showDashItem();
     });
 
     pauseBtn.addEventListener('click', ()=>{
