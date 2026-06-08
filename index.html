@@ -424,6 +424,13 @@
     }
     .bigItem .sp{ width:12px; display:inline-block; }
 
+    /* Wider visual spacing for multi-word cards (e.g. cry over spilt milk). */
+    .wordGap{ display:inline-block; width:.65em; }
+    .wordText .wordGap{ width:.55em; }
+    .pill .wordGap{ width:.45em; }
+    .plainWord{ color:#000; }
+    .plainWord span{ color:#000; }
+
 
     /* One Minute Dash phonogram card: small blue multi-sound label */
     .phonCard{
@@ -788,20 +795,20 @@ th.left, td.left{
     <button id="modeW" type="button">Words</button>
   </div>
   <div class="hint" id="modeHint">
-    Phonograms + HFW use a cumulative scope (all taught up to that point). Words uses <b>current session + previous 2 sessions</b>.
+    Phonograms + HFW use a cumulative scope (all taught up to that point). Words uses <b>current session/level + previous 2 sessions/levels</b>.
   </div>
 </div>
 
 
           <div class="control">
-            <h3>2) We are at (Cycle & Session)</h3>
+            <h3>2) We are at (Cycle & Session / Level)</h3>
             <div class="row-small">
   <div style="flex:1; min-width:140px;">
     <label class="hint" for="cycleSel">Cycle</label>
     <select id="cycleSel"></select>
   </div>
   <div style="flex:1; min-width:140px;">
-    <label class="hint" for="sessSel">Session</label>
+    <label class="hint" for="sessSel">Session / Level</label>
     <select id="sessSel"></select>
   </div>
 </div>
@@ -836,7 +843,7 @@ th.left, td.left{
           <div class="control" id="wordsPanel" style="display:none;">
             <h3>Words database — <span id="wordsSidLabel">C1S1</span></h3>
             <div class="hint">
-              Each word shows its session tag (e.g., <b>C1S1</b>). ▶ uses TTS.
+              Each word shows its session/level tag (e.g., <b>C1S1</b> or <b>C19 Level 1</b>). ▶ uses TTS.
               <span style="color:var(--vowel);font-weight:1000;">Vowels/vowel teams/magic-e/r-controlled/igh</span> are red,
               <span style="color:var(--prefix);font-weight:1000;">prefixes</span> (per lesson) are green,
               <span style="color:var(--suffix);font-weight:1000;">suffixes</span> (per lesson) are blue.
@@ -1081,13 +1088,22 @@ th.left, td.left{
       } catch(e) {}
     }
 
-    const TOTAL_CYCLES = 18;
+    const TOTAL_CYCLES = 26;
     const SESSIONS_PER_CYCLE = 3;
 
     function makeSessionId(c,s){ return `C${c}S${s}`; }
     function parseSessionId(id){
       const m = String(id||'').match(/^C(\d+)S(\d+)$/);
       return m ? { cycle: parseInt(m[1],10), session: parseInt(m[2],10) } : { cycle: 0, session: 0 };
+    }
+
+    function displaySessionId(id){
+      const o = parseSessionId(id);
+      return (o.cycle >= 19) ? `C${o.cycle} Level ${o.session}` : id;
+    }
+
+    function sessionSlotLabel(c, s){
+      return (Number(c) >= 19) ? `C${c} Level ${s}` : `Session ${s}`;
     }
 
     const SESSION_ORDER = [];
@@ -1230,7 +1246,33 @@ th.left, td.left{
 
       "C18S1": ["misuse","mistrust","mislead","misbehave","misplace","miscount","mismatch","misunderstand"],
       "C18S2": ["pretest","preview","prepaid","preheat","precook","premix","preconceive","precondition"],
-      "C18S3": ["restless","harmless","homeless","helpless","hopeless","endless","useless","painless","speechless","spotless","powerless"]
+      "C18S3": ["restless","harmless","homeless","helpless","hopeless","endless","useless","painless","speechless","spotless","powerless"],
+
+      // Cycle 19–26 Words Database: S1 = Level 1, S2 = Level 2, S3 = Level 3
+      "C19S1": ["complained", "holidays", "picnic", "sighed", "stole", "watch", "moment", "cry over spilt milk", "spending", "chocolate"],
+      "C19S2": ["shouted", "complained", "enjoying", "cry over spilt milk", "snatched", "sighed", "moment", "chocolate", "nearby", "picnic"],
+      "C19S3": ["comforted", "exclaimed", "appeared", "around", "quickly", "friends", "enjoying", "weather", "moment", "cry over spilt milk", "decided", "waddled", "chocolate", "botanical"],
+      "C20S1": ["scared", "confused", "afraid", "friends", "overheard", "inside", "buried", "charge", "alone", "brave"],
+      "C20S2": ["distance", "terrified", "confused", "together", "afraid", "stomp", "overheard", "forward", "alone", "buried", "gobble"],
+      "C20S3": ["conversation", "together", "terrified", "buried", "afraid", "confused", "overheard", "distance", "hooves", "forward", "otherwise", "devour"],
+      "C21S1": ["important", "usually", "hardworking", "protect", "weight", "dislike", "example", "colony", "strong"],
+      "C21S2": ["colony", "environment", "underground", "hardworking", "fierce", "every", "dislike", "protect", "tunnels", "searches", "defend"],
+      "C21S3": ["extremely", "environment", "important", "example", "ensures", "contain", "thousands", "nature", "survival", "defend", "underground", "colony", "dislike"],
+      "C22S1": ["laughed", "carefully", "squeezed", "quickly", "shocked", "mistake", "groaned", "normal", "filthy", "rinsed"],
+      "C22S2": ["immediately", "announced", "carefully", "enormous", "mistake", "laughed", "groaned", "generously", "normal", "temporary", "frustrated", "filthy"],
+      "C22S3": ["immediately", "announced", "carefully", "accident", "mistake", "enormous", "relieved", "explained", "laughed", "frustration", "temporary", "generously", "groaned", "paused", "downpour", "filthy"],
+      "C23S1": ["tough", "inconvenient", "thankful", "everyone", "forget", "throw", "areas", "rubbish", "break", "public", "play a part"],
+      "C23S2": ["appreciate", "inconvenient", "tough", "responsible", "areas", "everyone", "importantly", "public", "surroundings", "play a part"],
+      "C23S3": ["appreciate", "inconvenient", "efforts", "demanding", "disregard", "public", "areas", "everyone", "responsibility", "surroundings", "importantly", "void decks", "play a part"],
+      "C24S1": ["interesting", "unique", "escape", "attacked", "colourful", "prey", "scales", "creatures", "covered"],
+      "C24S2": ["predator", "unique", "marine", "escape", "attacks", "prey", "creatures", "extends", "capture", "interesting", "scientists"],
+      "C24S3": ["predator", "unique", "marine", "ditches", "ability", "scientists", "creatures", "capture", "extending", "interesting", "propel", "escape"],
+      "C25S1": ["hundreds", "examples", "insects", "amazing", "digests", "scary", "colour", "incredible", "different", "medicine"],
+      "C25S2": ["medicine", "incredible", "amazing", "attracts", "hundreds", "contains", "digest", "examples", "although", "terrible", "pouches", "nutrients", "scary"],
+      "C25S3": ["incredible", "nutrients", "although", "medicine", "instead", "digest", "attracts", "amazing", "harvest", "contain", "pouches", "hundreds"],
+      "C26S1": ["another", "beautiful", "whole", "buildings", "excited", "everywhere", "started", "windows", "tugged", "pod"],
+      "C26S2": ["beautiful", "excitedly", "minutes", "coloured", "against", "gasped", "queue", "whole", "quickly", "dotted", "capsule", "counter", "ticket"],
+      "C26S3": ["extremely", "wistfully", "beautiful", "queued", "building", "pedestrians", "whole", "spacious", "resist", "fidgeting", "awe", "breath-taking", "prickly"]
     };
 
     function encodeWordItem(sid, word){ return `${sid}::${word}`; }
@@ -1549,66 +1591,125 @@ soundToggle.addEventListener('click', ()=>{
     }
 
     let SPEECH_UNLOCKED = false;
-let SPEECH_VOICE = null;
+    let SPEECH_VOICE = null;
+    let SPEECH_TOKEN = 0;
 
-function pickVoice(){
-  const synth = window.speechSynthesis;
-  if(!synth) return null;
-  const voices = synth.getVoices ? synth.getVoices() : [];
-  if(!voices || !voices.length) return null;
-  const en = voices.find(v => /en/i.test(v.lang)) || voices[0];
-  return en || null;
-}
+    const UK_FEMALE_VOICE_HINTS = [
+      'sonia','libby','serena','kate','martha','susan','hazel','emma','amy','female','google uk english female'
+    ];
 
-function unlockSpeech(){
-  try{
-    const synth = window.speechSynthesis;
-    if(!synth) return false;
+    function pickVoice(){
+      const synth = window.speechSynthesis;
+      if(!synth) return null;
+      const voices = synth.getVoices ? synth.getVoices() : [];
+      if(!voices || !voices.length) return null;
 
-    SPEECH_VOICE = pickVoice();
+      const scored = voices.map(v=>{
+        const name = String(v.name || '').toLowerCase();
+        const lang = String(v.lang || '').toLowerCase();
+        let score = 0;
+        if(lang === 'en-gb') score += 100;
+        else if(lang.startsWith('en-gb')) score += 90;
+        else if(lang.startsWith('en-')) score += 35;
+        if(/uk|british|united kingdom|england/.test(name)) score += 30;
+        if(UK_FEMALE_VOICE_HINTS.some(h => name.includes(h))) score += 25;
+        if(v.localService) score += 3;
+        return { v, score };
+      }).sort((a,b)=>b.score-a.score);
 
-    const u = new SpeechSynthesisUtterance(' ');
-    u.volume = 0;   // keep it silent
-    u.rate = 1;
-    u.pitch = 1;
-    if(SPEECH_VOICE) u.voice = SPEECH_VOICE;
+      return scored[0]?.v || voices.find(v => /en/i.test(v.lang)) || voices[0] || null;
+    }
 
-    synth.cancel();
-    synth.speak(u);
+    function prepareSpeechText(text){
+      const raw = String(text || '').trim().replace(/\s+/g, ' ');
+      if(!raw) return '';
+      // For multi-word phrases, add light pauses so dyslexic pupils can hear each word clearly.
+      if(/\s/.test(raw)) return raw.split(' ').join(', ');
+      return raw;
+    }
 
-    SPEECH_UNLOCKED = true;
-    return true;
-  }catch(e){
-    return false;
-  }
-}
+    function unlockSpeech(){
+      try{
+        const synth = window.speechSynthesis;
+        if(!synth) return false;
 
-function speak(text){
-  try{
-    const synth = window.speechSynthesis;
-    if(!synth) return;
+        SPEECH_VOICE = pickVoice();
 
-    // stop HTML audio to reduce conflicts
-    const player = document.getElementById('player');
-    if(player){ try{ player.pause(); }catch(e){} }
+        const u = new SpeechSynthesisUtterance('ready');
+        u.volume = 0;   // keep it silent
+        u.rate = 0.72;
+        u.pitch = 1.03;
+        u.lang = 'en-GB';
+        if(SPEECH_VOICE) u.voice = SPEECH_VOICE;
 
-    if(!SPEECH_VOICE) SPEECH_VOICE = pickVoice();
+        synth.cancel();
+        synth.speak(u);
 
-    const utter = new SpeechSynthesisUtterance(String(text));
-    utter.rate = 0.95;
-    utter.pitch = 1.0;
-    if(SPEECH_VOICE) utter.voice = SPEECH_VOICE;
+        SPEECH_UNLOCKED = true;
+        return true;
+      }catch(e){
+        return false;
+      }
+    }
 
-    synth.cancel();
-    synth.speak(utter);
-  }catch(e){}
-}
+    function speak(text){
+      try{
+        const synth = window.speechSynthesis;
+        if(!synth) return Promise.resolve(false);
 
-if('speechSynthesis' in window){
-  window.speechSynthesis.onvoiceschanged = ()=>{
-    SPEECH_VOICE = pickVoice() || SPEECH_VOICE;
-  };
-}
+        const speechText = prepareSpeechText(text);
+        if(!speechText) return Promise.resolve(false);
+
+        // stop HTML audio to reduce conflicts
+        const player = document.getElementById('player');
+        if(player){ try{ player.pause(); player.currentTime = 0; }catch(e){} }
+
+        if(!SPEECH_VOICE) SPEECH_VOICE = pickVoice();
+
+        const token = ++SPEECH_TOKEN;
+        try{ synth.cancel(); }catch(e){}
+
+        return new Promise(resolve=>{
+          // A short delay after cancel() prevents Chrome/Edge from clipping the first syllable.
+          setTimeout(()=>{
+            if(token !== SPEECH_TOKEN) return resolve(false);
+
+            const utter = new SpeechSynthesisUtterance(speechText);
+            utter.lang = 'en-GB';
+            utter.rate = 0.72;    // slower and clearer for dyslexic pupils
+            utter.pitch = 1.03;   // slightly brighter, female-like when available
+            utter.volume = 1;
+            if(SPEECH_VOICE) utter.voice = SPEECH_VOICE;
+
+            let done = false;
+            const finish = ok=>{
+              if(done) return;
+              done = true;
+              resolve(!!ok);
+            };
+            utter.onend = ()=>finish(true);
+            utter.onerror = ()=>finish(false);
+
+            synth.speak(utter);
+
+            // Some browsers pause long TTS unless nudged; this keeps speech from cutting short.
+            const keepAlive = setInterval(()=>{
+              if(done || token !== SPEECH_TOKEN){ clearInterval(keepAlive); return; }
+              try{
+                if(synth.paused) synth.resume();
+                if(!synth.speaking && !synth.pending){ clearInterval(keepAlive); finish(true); }
+              }catch(e){ clearInterval(keepAlive); }
+            }, 250);
+          }, 90);
+        });
+      }catch(e){ return Promise.resolve(false); }
+    }
+
+    if('speechSynthesis' in window){
+      window.speechSynthesis.onvoiceschanged = ()=>{
+        SPEECH_VOICE = pickVoice() || SPEECH_VOICE;
+      };
+    }
 
     async function playPhonogramSound(item, currentSid){
       const keys = phonogramAudioKeys(item, currentSid);
@@ -1865,7 +1966,22 @@ if('speechSynthesis' in window){
       }
     }
 
+    function isPlainWordSid(sid){
+      const o = parseSessionId(sid);
+      return o.cycle >= 19 && o.cycle <= 26;
+    }
+
+    function renderPlainWordHTML(word){
+      const raw = String(word || '').trim();
+      if(!raw) return '';
+      const parts = raw.split(/\s+/g).filter(Boolean);
+      if(parts.length <= 1) return `<span class="plainWord">${escapeHTML(raw)}</span>`;
+      return `<span class="plainWord phraseWord">${parts.map(p=>`<span>${escapeHTML(p)}</span>`).join('<span class="wordGap" aria-hidden="true"></span>')}</span>`;
+    }
+
     function renderWordCoreHTML(word, sid){
+      if(isPlainWordSid(sid)) return renderPlainWordHTML(word);
+
       const s = String(word||'');
       const w = s.toLowerCase();
 
@@ -1907,7 +2023,7 @@ if('speechSynthesis' in window){
 
     function renderWordWithSidHTML(sid, word, small=false){
       const pillCls = small ? 'sidPill small' : 'sidPill';
-      return `<span class="${pillCls}">${sid}</span>` + renderWordCoreHTML(word, sid);
+      return `<span class="${pillCls}">${displaySessionId(sid)}</span>` + renderWordCoreHTML(word, sid);
     }
 
     function autoFitWordBox(el, minPx=18){
@@ -2133,10 +2249,20 @@ if(focusStartBtn){
       for(let s=1;s<=SESSIONS_PER_CYCLE;s++){
         const opt = document.createElement('option');
         opt.value = String(s);
-        opt.textContent = `Session ${s}`;
         sessSel.appendChild(opt);
       }
+      refreshSessionLabels();
     }
+
+    function refreshSessionLabels(){
+      if(!cycleSel || !sessSel) return;
+      const c = parseInt(cycleSel.value||'1',10);
+      Array.from(sessSel.options).forEach((opt, idx)=>{
+        const s = idx + 1;
+        opt.textContent = sessionSlotLabel(c, s);
+      });
+    }
+
     buildCycleSessionSelects();
 
     function currentSessionId(){
@@ -2150,6 +2276,7 @@ if(focusStartBtn){
 
    
    cycleSel.addEventListener('change', ()=>{
+  refreshSessionLabels();
   syncHfwEditor();
   syncWordsPanel();
   updateScopePreview(true);
@@ -2192,7 +2319,7 @@ if(focusStartBtn){
     function syncWordsPanel(){
       if(MODE !== 'W') return;
       const sid = currentSessionId();
-      wordsSidLabel.textContent = sid;
+      wordsSidLabel.textContent = displaySessionId(sid);
 
       const items = WORD_DB[sid] || [];
       wordsList.innerHTML = '';
@@ -2277,12 +2404,12 @@ if(focusStartBtn){
         const idx = SESSION_ORDER.indexOf(upToId);
         const start = Math.max(0, idx-2);
         const range = SESSION_ORDER.slice(start, idx+1);
-        const from = range[0];
-        const to = range[range.length-1];
-        return `Scope (${kind}): ${from} → ${to} (current + prev 2 sessions) | Items in scope: ${pool.length}`;
+        const from = displaySessionId(range[0]);
+        const to = displaySessionId(range[range.length-1]);
+        return `Scope (${kind}): ${from} → ${to} (current + prev 2 sessions/levels) | Items in scope: ${pool.length}`;
       }
       const title = TITLE_MAP[upToId] ? TITLE_MAP[upToId].replace(/^C\d+S\d+:\s*/,'') : '';
-      const label = `${upToId}${title ? ' — '+title : ''}`;
+      const label = `${displaySessionId(upToId)}${title ? ' — '+title : ''}`;
       return `Scope (${kind}): up to ${label} | Items in scope: ${pool.length}`;
     }
 
@@ -2350,9 +2477,9 @@ if(focusStartBtn){
       thead1.innerHTML = `
         <th rowspan="2" class="left">Cycle</th>
         <th rowspan="2">Type</th>
-        <th colspan="2">Session 1</th>
-        <th colspan="2">Session 2</th>
-        <th colspan="2">Session 3</th>
+        <th colspan="2">Session / Level 1</th>
+        <th colspan="2">Session / Level 2</th>
+        <th colspan="2">Session / Level 3</th>
       `;
       const thead2 = document.createElement('tr');
       thead2.innerHTML = `
@@ -2405,7 +2532,7 @@ if(focusStartBtn){
           const target = (field === 'target') ? newVal : cur.target;
           const actual = (field === 'actual') ? newVal : cur.actual;
           setOverride(mode, c, s, target, actual);
-          status(`Saved manual chart edit: ${mode} ${makeSessionId(c,s)} (T=${target}, A=${actual})`);
+          status(`Saved manual chart edit: ${mode} ${displaySessionId(makeSessionId(c,s))} (T=${target}, A=${actual})`);
           renderChart();
         });
 
@@ -2719,7 +2846,7 @@ if(focusStartBtn){
       const it = DAY.list[DAY.idx] ?? '';
       const sid = DAY.sid;
 
-      dayCountHint.textContent = `Item ${DAY.idx+1} of ${DAY.list.length} • ${sid}`;
+      dayCountHint.textContent = `Item ${DAY.idx+1} of ${DAY.list.length} • ${displaySessionId(sid)}`;
 
       if(DAY.kind === 'W'){
         dayBig.classList.add('hasSid');
@@ -2747,15 +2874,15 @@ if(focusStartBtn){
       const list = getDayList(kind, sid);
 
       if(!list.length){
-        alert(`No items found for ${kindLabel(kind)} at ${sid}.`);
+        alert(`No items found for ${kindLabel(kind)} at ${displaySessionId(sid)}.`);
         return;
       }
 
       DAY = { kind, sid, list, idx: 0 };
 
       dayTitle.textContent = kindLabel(kind);
-      daySub.textContent = sid;
-      dayAllTitle.textContent = `All items — ${sid}`;
+      daySub.textContent = displaySessionId(sid);
+      dayAllTitle.textContent = `All items — ${displaySessionId(sid)}`;
 
       renderDayAll(kind, sid, list);
       showDayItem();
@@ -2908,7 +3035,7 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
       }
 
       const modeLabel = (DASH.mode === 'P') ? 'Phonograms' : (DASH.mode === 'HFW') ? 'High Frequency Words' : 'Words';
-      dashMeta.textContent = `${modeLabel} · Selected: ${DASH.at} · Scope size ${DASH.scopeSize} · ${DASH.order === 'random' ? 'Randomised' : 'Sequence'} · ${DASH.timed ? 'Timed 60s' : 'Untimed'}`;
+      dashMeta.textContent = `${modeLabel} · Selected: ${displaySessionId(DASH.at)} · Scope size ${DASH.scopeSize} · ${DASH.order === 'random' ? 'Randomised' : 'Sequence'} · ${DASH.timed ? 'Timed 60s' : 'Untimed'}`;
       dashProgress.textContent = reviewing
         ? `Reviewing item ${idx+1} of ${DASH.scopeSize} · Already marked ${dashAnswerLabel(idx)} · Score locked`
         : `Item ${Math.min(DASH.idx+1, DASH.scopeSize)} of ${DASH.scopeSize}`;
