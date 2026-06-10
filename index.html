@@ -1434,6 +1434,7 @@ soundToggle.addEventListener('click', ()=>{
       "i":  { label:"i",  gate:"C1S1", count:2, audioBefore:["i"],  audioAfter:["i"] },
       "o":  { label:"o",  gate:"C1S1", count:2, audioBefore:["o"],  audioAfter:["o"] },
       "u":  { label:"u",  gate:"C1S1", count:2, audioBefore:["u"],  audioAfter:["u"] },
+      "s":  { label:"s",  gate:"C1S1", count:2, audioBefore:["s"],  audioAfter:["s","s_z"] },
 
       // Consonant letters with a second taught sound later.
       "c":      { label:"c", gate:"C8S1", count:2, group:"c", audioBefore:["c-hard"], audioAfter:["c-hard","c-soft"] },
@@ -1716,7 +1717,7 @@ soundToggle.addEventListener('click', ()=>{
       let playedAny = false;
 
       for(const key of keys){
-        const name = sanitizePhonogramName(key);
+        const name = (key === "s_z") ? "s_z" : sanitizePhonogramName(key);
         const candidates = AUDIO_EXTS.map(ext => `${AUDIO_BASE}${name}.${ext}`);
         const ok = await playViaPlayer(candidates);
         playedAny = playedAny || ok;
@@ -2864,7 +2865,7 @@ if(focusStartBtn){
       const it = DAY.list[DAY.idx];
       if(!it) return;
 
-      if(DAY.kind === 'P') playPhonogramSound(it);
+      if(DAY.kind === 'P') playPhonogramSound(it, String(it) === 's' ? DAY.sid : undefined);
       else if(DAY.kind === 'HFW') playHfwSound(it);
       else speak(it);
     }
