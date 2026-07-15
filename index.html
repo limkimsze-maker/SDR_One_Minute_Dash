@@ -706,6 +706,112 @@ th.left, td.left{
     }
   
 
+    /* Focus of the Day: onset–rime reading help for recognised one-syllable words */
+    .focus-onset-rime-tools{
+      width:100%;
+      display:grid;
+      gap:6px;
+      justify-items:center;
+      padding:8px;
+      border:1px solid #cfe1ff;
+      border-radius:14px;
+      background:#eef6ff;
+    }
+    .focus-onset-rime-tools[hidden]{ display:none !important; }
+    .focus-onset-rime-title{
+      margin:0;
+      color:#334155;
+      font-size:12px;
+      font-weight:900;
+      text-align:center;
+    }
+    .focus-onset-rime-actions{
+      width:100%;
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:8px;
+    }
+    .focus-onset-rime-actions .btn{
+      flex:1 1 92px;
+      min-width:0;
+      padding:7px 8px;
+    }
+    .focus-onset-rime-actions .btn.active{
+      background:#dbeafe;
+      border-color:#2563eb;
+      color:#1e3a8a;
+      box-shadow:0 0 0 3px rgba(37,99,235,.12);
+    }
+    .focus-onset-rime-hint{
+      min-height:1.35em;
+      color:#475569;
+      font-size:12px;
+      font-weight:800;
+      text-align:center;
+    }
+    .focus-word-part{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:1.2em;
+    }
+    .focus-empty-onset{
+      color:#64748b;
+      font-size:.7em;
+      letter-spacing:0;
+    }
+
+    /* Wipe away the unneeded part while changing from the whole word. */
+    .focus-wipe-stage{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      white-space:nowrap;
+    }
+    .focus-wipe-away{
+      position:relative;
+      display:inline-flex;
+      white-space:nowrap;
+      isolation:isolate;
+    }
+    .focus-wipe-away::after{
+      content:'';
+      position:absolute;
+      top:-.12em;
+      bottom:-.12em;
+      width:0;
+      z-index:3;
+      background:var(--itembg);
+      animation-duration:2.2s;
+      animation-timing-function:linear;
+      animation-fill-mode:forwards;
+      pointer-events:none;
+    }
+    .focus-wipe-away-rime::after{
+      right:-.04em;
+      animation-name:focusCoverFromRight;
+      box-shadow:-2px 0 0 rgba(37,99,235,.35);
+    }
+    .focus-wipe-away-onset::after{
+      left:-.04em;
+      animation-name:focusCoverFromLeft;
+      box-shadow:2px 0 0 rgba(37,99,235,.35);
+    }
+    .focus-whole-reveal{ animation:focusWholeReveal .35s ease-out both; }
+
+    @keyframes focusCoverFromRight{
+      0%, 14%{ width:0; }
+      100%{ width:calc(100% + .10em); }
+    }
+    @keyframes focusCoverFromLeft{
+      0%, 14%{ width:0; }
+      100%{ width:calc(100% + .10em); }
+    }
+    @keyframes focusWholeReveal{
+      from{ clip-path:inset(0 50% 0 50%); opacity:.45; }
+      to{ clip-path:inset(0 0 0 0); opacity:1; }
+    }
     /* Teacher Annotation Tools */
     #teacherDrawCanvas{
       position:fixed;
@@ -1414,6 +1520,15 @@ th.left, td.left{
             <h3 class="focus-card-title" id="focusWordsHeading">Words</h3>
             <div class="bigItem" id="dayBig">—</div>
 
+            <div id="focusOnsetRimeTools" class="focus-onset-rime-tools" hidden>
+              <p class="focus-onset-rime-title">Reading help for a one-syllable word</p>
+              <div class="focus-onset-rime-actions" role="group" aria-label="Show onset, rime or whole word">
+                <button class="btn ghost small" id="focusShowOnsetBtn" type="button">Onset only</button>
+                <button class="btn ghost small" id="focusShowRimeBtn" type="button">Rime only</button>
+                <button class="btn ghost small active" id="focusShowWholeWordBtn" type="button">Whole word</button>
+              </div>
+              <div class="focus-onset-rime-hint" id="focusOnsetRimeHint" aria-live="polite"></div>
+            </div>
             <div class="row-small" style="justify-content:center;">
               <button class="btn ghost small" id="dayPlayBtn" type="button">🔊 Play</button>
             </div>
@@ -2555,6 +2670,147 @@ soundToggle.addEventListener('click', ()=>{
       return `<span class="${pillCls}">${displaySessionId(sid)}</span>` + renderWordCoreHTML(word, sid);
     }
 
+    const FOCUS_ONE_SYLLABLE_WORDS = new Set(["age","awe","back","badge","bag","baked","be","beige","bird","black","blank","bled","block","bloom","blotch","blue","boat","books","box","boy","brain","brave","bread","break","breath","brew","bridge","bright","broke","brown","brunch","burst","buzz","can","catch","cent","charge","charmed","chat","check","chew","chief","chip","chop","church","claw","clean","clock","club","clue","clunk","clutch","coin","cook","cord","count","crab","crawl","crawled","cried","cross","cry","cut","dad","dark","dawn","dead","deep","dew","ditch","draw","dress","dried","drop","drum","dry","edge","face","far","feel","feet","fetch","few","field","fierce","fight","fill","fine","five","fix","flap","flat","fled","flew","flies","flight","float","fly","food","force","found","fridge","fried","friends","fright","frog","frown","fruit","fry","fudge","fun","fuzz","gain","gasped","girl","go","grab","gram","great","green","grew","grey","grin","groan","groaned","ground","grow","growl","grown","hat","hatch","hawk","he","heat","hedge","help","hid","hole","home","hooves","hope","hot","house","hue","huff","huge","hutch","ice","jaw","jazz","jewel","judge","juice","key","knead","knee","kneel","knew","knife","knight","knit","knob","knock","knot","know","known","lake","large","laughed","law","lawn","leapt","least","ledge","length","less","lie","light","load","lodge","lung","map","mark","match","me","meet","men","mess","mew","might","miss","moist","moth","mud","must","my","nap","neck","new","night","nights","nine","no","nod","north","nose","not","note","nudge","on","pack","patch","paused","pay","pick","picked","pie","piece","pile","pink","pitch","place","plan","plane","play","played","pledge","ploy","pluck","plum","plump","plus","pod","point","pond","prawn","prey","print","quake","queue","queued","quick","reach","reached","rein","rice","rich","ridge","right","rinsed","roast","rock","room","round","same","sand","saw","scales","scared","scrape","scrub","sea","seen","seize","seized","set","shake","shape","shapes","sharp","she","shed","shield","ship","shock","shocked","shop","short","shown","shriek","shrug","shut","side","sighed","sight","sit","skin","skirt","sky","sleep","slime","sly","smack","smell","smooth","snarl","snatch","snatched","so","soil","song","soon","sound","space","speed","spend","spilt","spot","spread","spree","spring","sprint","squeeze","squeezed","stamps","stand","state","stay","steak","step","stew","stick","stitch","stole","stomp","stone","stood","stop","strain","strap","straw","stream","street","strict","strike","strong","stuck","stuff","sun","sway","swim","teeth","that","thaw","theme","then","these","they","thick","thief","thigh","thing","think","third","three","threw","throw","tight","tip","took","tooth","toss","tough","towel","town","toy","track","train","treat","trip","truck","true","try","tube","tugged","twin","up","veil","vein","voice","wait","walked","watch","we","week","weight","well","whirl","whole","wide","wish","witch","with","worked","yes"]);
+    const focusOnsetRimeState = { word:'', view:'whole' };
+    const FOCUS_ONSET_RIME_WIPE_MS = 2200;
+    let focusOnsetRimeWipeTimer = 0;
+
+    function focusCancelOnsetRimeWipe(){
+      if(focusOnsetRimeWipeTimer){
+        clearTimeout(focusOnsetRimeWipeTimer);
+        focusOnsetRimeWipeTimer = 0;
+      }
+    }
+
+    function focusIsOneSyllableWord(word){
+      return FOCUS_ONE_SYLLABLE_WORDS.has(String(word || '').trim().toLowerCase());
+    }
+
+    function focusSplitOnsetRime(word){
+      const raw = String(word || '').trim();
+      const lower = raw.toLowerCase();
+      let splitAt = -1;
+
+      for(let i=0; i<lower.length; i++){
+        const ch = lower[i];
+        if(!/[a-z]/.test(ch)) continue;
+        if(ch === 'u' && i > 0 && lower[i-1] === 'q') continue;
+        if(/[aeiou]/.test(ch) || (ch === 'y' && i > 0)){
+          splitAt = i;
+          break;
+        }
+      }
+
+      if(splitAt < 0) splitAt = 0;
+      return { onset:raw.slice(0, splitAt), rime:raw.slice(splitAt) };
+    }
+
+    function focusSyncOnsetRimeButtons(){
+      if(!focusShowOnsetBtn || !focusShowRimeBtn || !focusShowWholeWordBtn) return;
+      focusShowOnsetBtn.classList.toggle('active', focusOnsetRimeState.view === 'onset');
+      focusShowRimeBtn.classList.toggle('active', focusOnsetRimeState.view === 'rime');
+      focusShowWholeWordBtn.classList.toggle('active', focusOnsetRimeState.view === 'whole');
+      focusShowOnsetBtn.setAttribute('aria-pressed', String(focusOnsetRimeState.view === 'onset'));
+      focusShowRimeBtn.setAttribute('aria-pressed', String(focusOnsetRimeState.view === 'rime'));
+      focusShowWholeWordBtn.setAttribute('aria-pressed', String(focusOnsetRimeState.view === 'whole'));
+    }
+
+    function focusHideOnsetRimeTools(){
+      focusCancelOnsetRimeWipe();
+      if(focusOnsetRimeTools) focusOnsetRimeTools.hidden = true;
+      focusOnsetRimeState.word = '';
+      focusOnsetRimeState.view = 'whole';
+      if(focusOnsetRimeHint) focusOnsetRimeHint.textContent = '';
+      focusSyncOnsetRimeButtons();
+    }
+
+    function focusRenderOnsetRimeView(){
+      if(!DAY || DAY.kind !== 'W') return;
+      const word = String(DAY.list[DAY.idx] ?? '');
+      const sid = DAY.sid;
+      const parts = focusSplitOnsetRime(word);
+      const sidPill = `<span class="sidPill">${displaySessionId(sid)}</span>`;
+
+      if(focusOnsetRimeState.view === 'onset'){
+        dayBig.innerHTML = sidPill + (parts.onset
+          ? `<span class="focus-word-part cons">${escapeHTML(parts.onset)}</span>`
+          : '<span class="focus-word-part focus-empty-onset">∅</span>');
+        if(focusOnsetRimeHint) focusOnsetRimeHint.textContent = parts.onset ? `Onset: ${parts.onset}` : 'No onset — the word starts with a vowel.';
+      } else if(focusOnsetRimeState.view === 'rime'){
+        dayBig.innerHTML = sidPill + `<span class="focus-word-part">${renderWordCoreHTML(parts.rime, sid)}</span>`;
+        if(focusOnsetRimeHint) focusOnsetRimeHint.textContent = `Rime: ${parts.rime}`;
+      } else {
+        dayBig.innerHTML = `<span class="focus-whole-reveal">${renderWordWithSidHTML(sid, word, false)}</span>`;
+        if(focusOnsetRimeHint) focusOnsetRimeHint.textContent = `Blend: ${parts.onset || '∅'} + ${parts.rime} = ${word}`;
+      }
+
+      focusSyncOnsetRimeButtons();
+      autoFitWordBox(dayBig, 18);
+    }
+
+    function focusPrepareOnsetRime(word){
+      const raw = String(word || '');
+      if(!focusIsOneSyllableWord(raw)){
+        focusHideOnsetRimeTools();
+        return;
+      }
+      if(focusOnsetRimeState.word !== raw){
+        focusCancelOnsetRimeWipe();
+        focusOnsetRimeState.word = raw;
+        focusOnsetRimeState.view = 'whole';
+      }
+      if(focusOnsetRimeTools) focusOnsetRimeTools.hidden = false;
+      focusRenderOnsetRimeView();
+    }
+
+    function focusSetOnsetRimeView(view){
+      const nextView = ['onset','rime','whole'].includes(view) ? view : 'whole';
+      focusCancelOnsetRimeWipe();
+
+      if(!DAY || DAY.kind !== 'W') {
+        focusOnsetRimeState.view = nextView;
+        return;
+      }
+
+      if(nextView === 'whole') {
+        focusOnsetRimeState.view = 'whole';
+        focusRenderOnsetRimeView();
+        return;
+      }
+
+      const word = String(DAY.list[DAY.idx] ?? '');
+      const sid = DAY.sid;
+      const parts = focusSplitOnsetRime(word);
+      const sidPill = `<span class="sidPill">${displaySessionId(sid)}</span>`;
+      const onsetHTML = parts.onset
+        ? `<span class="focus-word-part cons">${escapeHTML(parts.onset)}</span>`
+        : '<span class="focus-word-part focus-empty-onset">∅</span>';
+      const rimeHTML = `<span class="focus-word-part">${renderWordCoreHTML(parts.rime, sid)}</span>`;
+
+      focusOnsetRimeState.view = nextView;
+      focusSyncOnsetRimeButtons();
+
+      if(nextView === 'onset') {
+        dayBig.innerHTML = sidPill + `<span class="focus-wipe-stage">${onsetHTML}<span class="focus-wipe-away focus-wipe-away-rime">${rimeHTML}</span></span>`;
+        if(focusOnsetRimeHint) focusOnsetRimeHint.textContent = parts.onset ? `Onset: ${parts.onset}` : 'No onset — the word starts with a vowel.';
+      } else {
+        dayBig.innerHTML = sidPill + `<span class="focus-wipe-stage"><span class="focus-wipe-away focus-wipe-away-onset">${onsetHTML}</span>${rimeHTML}</span>`;
+        if(focusOnsetRimeHint) focusOnsetRimeHint.textContent = `Rime: ${parts.rime}`;
+      }
+
+      autoFitWordBox(dayBig, 18);
+
+      const finish = ()=>{
+        focusOnsetRimeWipeTimer = 0;
+        if(!DAY || DAY.kind !== 'W') return;
+        if(String(DAY.list[DAY.idx] ?? '') !== word) return;
+        if(focusOnsetRimeState.view !== nextView) return;
+        focusRenderOnsetRimeView();
+      };
+
+      /* Keep this teaching wipe visible even when the device requests reduced motion. */
+      focusOnsetRimeWipeTimer = window.setTimeout(finish, FOCUS_ONSET_RIME_WIPE_MS);
+    }
     function autoFitWordBox(el, minPx=18){
       if(!el) return;
       el.style.fontSize = '';
@@ -2617,6 +2873,11 @@ soundToggle.addEventListener('click', ()=>{
     const dayTitle = document.getElementById('dayTitle');
     const daySub = document.getElementById('daySub');
     const dayBig = document.getElementById('dayBig');
+    const focusOnsetRimeTools = document.getElementById('focusOnsetRimeTools');
+    const focusShowOnsetBtn = document.getElementById('focusShowOnsetBtn');
+    const focusShowRimeBtn = document.getElementById('focusShowRimeBtn');
+    const focusShowWholeWordBtn = document.getElementById('focusShowWholeWordBtn');
+    const focusOnsetRimeHint = document.getElementById('focusOnsetRimeHint');
     const dayPlayBtn = document.getElementById('dayPlayBtn');
     const dayPrevBtn = document.getElementById('dayPrevBtn');
     const dayNextBtn = document.getElementById('dayNextBtn');
@@ -3505,7 +3766,9 @@ if(focusStartBtn){
         dayBig.classList.add('hasSid');
         dayBig.innerHTML = renderWordWithSidHTML(sid, it, false);
         autoFitWordBox(dayBig, 22);
+        focusPrepareOnsetRime(it);
       } else {
+        focusHideOnsetRimeTools();
         dayBig.classList.remove('hasSid');
         dayBig.style.fontSize = '';
         dayBig.textContent = it || '—';
@@ -3568,6 +3831,9 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
       showDayItem();
     });
     dayPlayBtn.addEventListener('click', playDayItem);
+    if(focusShowOnsetBtn) focusShowOnsetBtn.addEventListener('click', ()=> focusSetOnsetRimeView('onset'));
+    if(focusShowRimeBtn) focusShowRimeBtn.addEventListener('click', ()=> focusSetOnsetRimeView('rime'));
+    if(focusShowWholeWordBtn) focusShowWholeWordBtn.addEventListener('click', ()=> focusSetOnsetRimeView('whole'));
     backFromDay.addEventListener('click', ()=> { closeFocusPoster(); switchView('setup'); });
 
     const DASH_SECONDS = 60;
