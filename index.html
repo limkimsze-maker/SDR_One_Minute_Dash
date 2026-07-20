@@ -104,8 +104,12 @@
       justify-content:center;
       align-items:flex-start;
       min-height:100vh;
-      padding:16px;
+      height:100vh;
+      overflow:hidden;
+      /* Keep a permanent clear strip for the fixed teacher toolbar. */
+      padding:72px 16px 16px;
       gap:20px;
+      scroll-padding-top:72px;
     }
 
     @media (max-width:520px){
@@ -131,6 +135,9 @@
 
     #omdApp{
       width:min(1200px, 95vw);
+      max-height:calc(100vh - 88px);
+      overflow:auto;
+      scroll-padding-top:12px;
       background:var(--card);
       border-radius:18px;
       box-shadow:var(--shadow);
@@ -259,6 +266,11 @@
     .btn.bad{ background:var(--bad); }
     .btn.warn{ background:var(--warn); }
     .btn.primary{ background:var(--brand); }
+    .btn.export{ background:#2563eb; }
+    .btn.import{ background:#7c3aed; }
+    .btn.session{ background:#0891b2; }
+    .btn.spelling{ background:#16a34a; }
+    .btn.reset{ background:#e11d48; }
     .btn.small{ padding:8px 10px; font-size:13px; border-radius:10px; }
 .btn.big{
   padding:14px 18px;
@@ -627,6 +639,7 @@ th.left, td.left{
       gap:10px;
       margin-top:10px;
     }
+
     .wordRow{
       display:flex;
       gap:10px;
@@ -812,7 +825,7 @@ th.left, td.left{
       from{ clip-path:inset(0 50% 0 50%); opacity:.45; }
       to{ clip-path:inset(0 0 0 0); opacity:1; }
     }
-    /* Teacher Annotation Tools */
+    /* Teacher Annotation Tools — fixed, compact and always accessible */
     #teacherDrawCanvas{
       position:fixed;
       inset:0;
@@ -825,62 +838,153 @@ th.left, td.left{
 
     .tdraw-toolbar{
       position:fixed;
-      top:14px;
-      right:14px;
+      top:8px;
+      right:8px;
       z-index:100000;
-      width:min(360px, calc(100vw - 28px));
-      background:rgba(255,255,255,.96);
+      width:max-content;
+      max-width:calc(100vw - 16px);
+      height:52px;
+      display:flex;
+      align-items:center;
+      gap:4px;
+      padding:5px 6px;
+      overflow-x:auto;
+      overflow-y:hidden;
+      background:rgba(255,255,255,.98);
       color:#0f172a;
       border:1px solid rgba(15,23,42,.16);
-      border-radius:18px;
-      box-shadow:0 20px 60px rgba(15,23,42,.22);
-      overflow:hidden;
+      border-radius:11px;
+      box-shadow:0 8px 24px rgba(15,23,42,.20);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       font-family:"Lexend", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       user-select:none;
+      scrollbar-width:thin;
     }
 
-    .tdraw-head{
+    /* Fixed setup frame: the page itself never scrolls. The chart and an
+       expanded database use their own bounded areas only when necessary. */
+    #omdApp.setup-fit{
+      height:calc(100vh - 88px);
+      max-height:calc(100vh - 88px);
+      overflow:hidden;
       display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:8px;
-      padding:10px 12px;
-      background:#0f172a;
-      color:#fff;
-      cursor:move;
+      flex-direction:column;
+      padding:14px 16px;
     }
-
-    .tdraw-title{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      font-weight:1000;
-      font-size:14px;
-      white-space:nowrap;
+    #omdApp.setup-fit > header{
+      flex:0 0 auto;
+      gap:5px;
+      margin-bottom:8px;
     }
-
-    .tdraw-body{
-      display:grid;
-      gap:10px;
-      padding:12px;
-      max-height:min(72vh, 560px);
-      overflow:auto;
-    }
-
-    .tdraw-row{
-      display:flex;
-      align-items:center;
-      flex-wrap:wrap;
-      gap:8px;
-    }
-
-    .tdraw-label{
+    #omdApp.setup-fit > header h1{ font-size:21px; }
+    #omdApp.setup-fit > header p{
       font-size:12px;
-      font-weight:1000;
-      color:#475569;
-      width:100%;
+      line-height:1.35;
+      max-width:none;
+    }
+    #omdApp.setup-fit .topbar{ margin-top:2px; gap:6px; }
+    #omdApp.setup-fit .topbar .row-small{ gap:6px; }
+    #omdApp.setup-fit .topbar .btn.small,
+    #omdApp.setup-fit .topbar .toggle{
+      min-height:36px;
+      padding:7px 10px;
+      font-size:12px;
+      box-shadow:0 5px 12px rgba(15,23,42,.14);
+    }
+    #omdApp.setup-fit #setupView.active{
+      display:block;
+      flex:1 1 auto;
+      min-height:0;
+      overflow:hidden;
+    }
+    #omdApp.setup-fit #setupView > .row{
+      height:100%;
+      min-height:0;
+      grid-template-columns:minmax(310px, 350px) minmax(0, 1fr);
+      gap:12px;
+    }
+    #omdApp.setup-fit #setupView .controls{
+      min-height:0;
+      overflow:hidden;
+    }
+    #omdApp.setup-fit #setupView .panel{
+      height:100%;
+      min-height:0;
+      max-height:none;
+      overflow:auto;
+      padding:10px;
+      overscroll-behavior:contain;
+    }
+    #omdApp.setup-fit #setupView .control{
+      padding:8px 9px;
+      margin-bottom:6px;
+      border-radius:11px;
+    }
+    #omdApp.setup-fit #setupView .control h3{
+      margin:0 0 5px;
+      font-size:13px;
+    }
+    #omdApp.setup-fit #setupView .hint{
+      margin-top:3px;
+      font-size:10.5px;
+      line-height:1.35;
+    }
+    #omdApp.setup-fit #setupView .seg{ gap:5px; }
+    #omdApp.setup-fit #setupView .seg button{
+      padding:6px 9px;
+      font-size:11px;
+      box-shadow:0 3px 8px rgba(15,23,42,.08);
+    }
+    #omdApp.setup-fit #setupView select,
+    #omdApp.setup-fit #setupView input[type="number"]{
+      min-height:34px;
+      padding:6px 8px;
+      font-size:12px;
+    }
+    #omdApp.setup-fit #hfwEditor textarea{
+      min-height:58px;
+      max-height:72px;
+      padding:7px 8px;
+      font-size:12px;
+    }
+    #omdApp.setup-fit #dashOnly{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:6px;
+    }
+    #omdApp.setup-fit #dashOnly > .control{ margin:0; }
+    #omdApp.setup-fit #dashOnly > .control:last-of-type{ grid-column:1 / -1; }
+    #omdApp.setup-fit #startBtn{
+      min-width:145px;
+      font-size:15px;
+      box-shadow:0 7px 16px rgba(22,163,74,.25);
+    }
+    #omdApp.setup-fit #resetBtn{ background:#e11d48; color:#fff; border:none; }
+    #omdApp.setup-fit #autoTargetBtn{ background:#2563eb; color:#fff; border:none; }
+    #omdApp.setup-fit .credit{
+      margin-top:5px;
+      font-size:9px;
+      line-height:1.2;
+    }
+
+    @media (max-width:760px){
+      #omdApp.setup-fit{ overflow:auto; height:auto; max-height:calc(100vh - 88px); }
+      #omdApp.setup-fit #setupView.active{ overflow:visible; }
+      #omdApp.setup-fit #setupView > .row{ height:auto; grid-template-columns:1fr; }
+      #omdApp.setup-fit #setupView .controls{ overflow:visible; }
+      #omdApp.setup-fit #setupView .panel{ height:auto; max-height:55vh; }
+    }
+
+    .tdraw-group{
+      display:flex;
+      align-items:center;
+      gap:4px;
+      flex:0 0 auto;
+    }
+    .tdraw-group + .tdraw-group{
+      border-left:1px solid #d7dee8;
+      padding-left:5px;
     }
 
     .tdraw-btn{
@@ -888,41 +992,34 @@ th.left, td.left{
       border:1px solid #dbe4f0;
       background:#f8fafc;
       color:#0f172a;
-      border-radius:12px;
-      padding:8px 10px;
-      min-height:38px;
+      border-radius:8px;
+      width:38px;
+      height:38px;
+      padding:6px;
       font-family:inherit;
-      font-size:13px;
+      font-size:17px;
+      line-height:1;
       font-weight:1000;
       cursor:pointer;
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      gap:6px;
-      box-shadow:0 4px 12px rgba(15,23,42,.07);
+      flex:0 0 auto;
+      box-shadow:none;
     }
 
-    .tdraw-btn:hover{ filter:brightness(.98); }
+    .tdraw-btn:hover{ background:#eef2f7; }
     .tdraw-btn:active{ transform:translateY(1px); }
     .tdraw-btn.active{
       background:#dbeafe;
       border-color:#2563eb;
       color:#1e3a8a;
+      box-shadow:inset 0 0 0 1px #2563eb;
     }
     .tdraw-btn.danger{
       background:#fff1f2;
       border-color:#fecdd3;
       color:#9f1239;
-    }
-    .tdraw-btn.good{
-      background:#ecfdf5;
-      border-color:#bbf7d0;
-      color:#065f46;
-    }
-    .tdraw-btn.dark{
-      background:#111827;
-      border-color:#111827;
-      color:#fff;
     }
     .tdraw-btn:disabled{
       opacity:.42;
@@ -931,57 +1028,46 @@ th.left, td.left{
     }
 
     .tdraw-color{
-      width:40px;
+      width:38px;
       height:38px;
       padding:2px;
       border:1px solid #cbd5e1;
-      border-radius:12px;
+      border-radius:8px;
       background:#fff;
       cursor:pointer;
+      flex:0 0 auto;
     }
 
-    .tdraw-swatch{
-      width:28px;
-      height:28px;
-      border-radius:999px;
-      border:2px solid rgba(15,23,42,.18);
-      cursor:pointer;
-      box-shadow:0 3px 8px rgba(15,23,42,.12);
+    .tdraw-select,
+    .tdraw-text-input{
+      height:38px;
+      border:1px solid #cbd5e1;
+      border-radius:8px;
+      background:#fff;
+      color:#0f172a;
+      font:800 12px/1 "Lexend", system-ui, sans-serif;
+      padding:0 8px;
     }
-    .tdraw-swatch.active{
-      outline:3px solid rgba(37,99,235,.30);
-      outline-offset:2px;
+    .tdraw-select{
+      width:70px;
+      flex:0 0 70px;
     }
+    .tdraw-text-input{
+      width:118px;
+      flex:0 0 118px;
+      cursor:text;
+    }
+    .tdraw-text-input::placeholder{ color:#64748b; }
 
-    .tdraw-range{
-      flex:1;
-      min-width:140px;
-      accent-color:#2563eb;
+    .tdraw-icon{
+      width:23px;
+      height:23px;
+      display:block;
+      pointer-events:none;
     }
-
-    .tdraw-size-pill{
-      min-width:48px;
-      text-align:center;
-      font-size:12px;
-      font-weight:1000;
-      color:#334155;
-      background:#f1f5f9;
-      border:1px solid #e2e8f0;
-      border-radius:999px;
-      padding:5px 8px;
+    .tdraw-icon *{
+      vector-effect:non-scaling-stroke;
     }
-
-    .tdraw-note{
-      font-size:11px;
-      line-height:1.45;
-      color:#64748b;
-      background:#f8fafc;
-      border:1px dashed #cbd5e1;
-      border-radius:12px;
-      padding:8px 10px;
-    }
-
-    .tdraw-toolbar.collapsed .tdraw-body{ display:none; }
 
     a,
     button,
@@ -1003,29 +1089,6 @@ th.left, td.left{
       cursor:text;
     }
 
-    #teacherDrawDragHandle{
-      cursor:move;
-    }
-
-    .tdraw-pulse{
-      position:fixed;
-      width:36px;
-      height:36px;
-      margin-left:-18px;
-      margin-top:-18px;
-      border:4px solid currentColor;
-      border-radius:999px;
-      z-index:99995;
-      pointer-events:none;
-      animation:tdrawPulse .85s ease-out forwards;
-      box-shadow:0 0 0 9999px rgba(0,0,0,0);
-    }
-
-    @keyframes tdrawPulse{
-      from{ transform:scale(.5); opacity:.95; }
-      to{ transform:scale(2.4); opacity:0; }
-    }
-
     @media (max-width:520px){
       .tdraw-toolbar{
         left:8px;
@@ -1033,8 +1096,7 @@ th.left, td.left{
         top:8px;
         width:auto;
       }
-      .tdraw-body{ max-height:55vh; }
-      .tdraw-btn{ padding:7px 9px; font-size:12px; }
+      .tdraw-text-input{ width:96px; flex-basis:96px; }
     }
 
     /* Focus of the Day: the word panel and reference posters share the screen equally. */
@@ -1185,7 +1247,7 @@ th.left, td.left{
       width:100%;
       min-height:0;
       display:grid;
-      place-items:start center;
+      place-items:center;
       overflow:hidden;
       border-radius:11px;
       background:#fffdf0;
@@ -1194,13 +1256,178 @@ th.left, td.left{
 
     .focus-poster-thumb{
       display:block;
-      width:100%;
+      width:auto;
       height:auto;
+      max-width:100%;
       max-height:64vh;
       object-fit:contain;
-      object-position:top center;
+      object-position:center;
       user-select:none;
       -webkit-user-drag:none;
+    }
+
+    /* Focus view automatically occupies the usable frame below the fixed teacher toolbar. */
+    #omdApp.focus-fit{
+      width:calc(100vw - 32px);
+      max-width:none;
+      padding:10px;
+    }
+
+    #omdApp.focus-fit > header{
+      display:none;
+    }
+
+    #omdApp.focus-fit #dayView.active > .dashCard{
+      width:100%;
+      padding:8px;
+      gap:8px;
+    }
+
+    #omdApp.focus-fit #focusDayGrid{
+      height:var(--focus-frame-height, calc(100dvh - 190px));
+      min-height:420px;
+      gap:10px;
+    }
+
+    #omdApp.focus-fit .focus-resource-card,
+    #omdApp.focus-fit .focus-word-card,
+    #omdApp.focus-fit .focus-poster-card,
+    #omdApp.focus-fit .focus-poster-thumb-wrap{
+      height:100%;
+      min-height:0;
+    }
+
+    #omdApp.focus-fit .focus-poster-open{
+      min-height:0;
+      align-self:stretch;
+      overflow:hidden;
+    }
+
+    /* A fixed inner viewport prevents tall posters from being sized from width
+       alone when only the Words panel and one poster remain. */
+    #omdApp.focus-fit .focus-poster-thumb-wrap{
+      position:relative;
+      width:100%;
+      height:100%;
+      min-width:0;
+      min-height:0;
+    }
+
+    #omdApp.focus-fit .focus-resource-card{
+      padding:9px;
+    }
+
+    #omdApp.focus-fit .focus-poster-thumb{
+      position:absolute;
+      inset:0;
+      width:100% !important;
+      height:100% !important;
+      max-width:none !important;
+      max-height:none !important;
+      object-fit:contain !important;
+      object-position:center !important;
+    }
+
+    #omdApp.focus-fit .focus-word-card .bigItem,
+    #omdApp.focus-fit .focus-word-card .bigItem.hasSid{
+      min-height:clamp(100px, 17vh, 160px);
+    }
+
+    /* During a live Dash, use one fixed screen with no internal scrolling. */
+    #omdApp.dash-fit{
+      width:calc(100vw - 32px);
+      max-width:none;
+      height:calc(100vh - 88px);
+      max-height:calc(100vh - 88px);
+      padding:10px;
+      overflow:hidden;
+    }
+
+    #omdApp.dash-fit > header{
+      display:none;
+    }
+
+    #omdApp.dash-fit #dashView.active{
+      width:100%;
+      height:100%;
+      min-height:0;
+      overflow:hidden;
+    }
+
+    #omdApp.dash-fit #dashView.active > .dashCard{
+      width:100%;
+      height:100%;
+      min-height:0;
+      padding:12px;
+      gap:8px;
+      grid-template-rows:auto auto auto minmax(0,1fr) auto auto auto auto;
+      align-content:stretch;
+      overflow:hidden;
+    }
+
+    #omdApp.dash-fit #dashItem{
+      width:min(820px, 82vw);
+      max-width:100%;
+      height:100%;
+      min-height:110px;
+      max-height:none;
+      justify-self:center;
+      font-size:clamp(58px, 12vh, 140px);
+    }
+
+    #omdApp.dash-fit #dashItem.hasSid{
+      font-size:clamp(48px, 10vh, 120px);
+    }
+
+    #omdApp.dash-fit #dashProgress,
+    #omdApp.dash-fit #dashMeta{
+      margin:0;
+    }
+
+    .dash-top-row{
+      width:100%;
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      align-items:center;
+      gap:10px;
+    }
+
+    .dash-top-row > #backSetupFromDash{ justify-self:start; }
+    .dash-top-actions{
+      justify-self:end;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    #dashSoundBtn.on{
+      background:#ecfdf5;
+      border-color:#86efac;
+      color:#065f46;
+    }
+
+    @media (max-height:700px){
+      #omdApp.dash-fit #dashView.active > .dashCard{ padding:8px; gap:5px; }
+      #omdApp.dash-fit .timer{ font-size:34px; }
+      #omdApp.dash-fit #dashItem{ min-height:86px; font-size:clamp(48px, 10vh, 100px); }
+      #omdApp.dash-fit #dashItem.hasSid{ font-size:clamp(42px, 9vh, 92px); }
+      #omdApp.dash-fit .kpi span{ padding:4px 8px; }
+    }
+
+    @media (max-width:900px){
+      #omdApp.focus-fit #focusDayGrid{
+        grid-template-columns:repeat(2, minmax(0,1fr));
+        height:auto;
+        min-height:0;
+      }
+      #omdApp.focus-fit #focusDayGrid[data-visible-items="1"]{ grid-template-columns:1fr; }
+      #omdApp.focus-fit .focus-resource-card{ min-height:560px; }
+    }
+
+    @media (max-width:600px){
+      #omdApp.focus-fit{ width:calc(100vw - 16px); padding:6px; }
+      #omdApp.focus-fit #focusDayGrid{ grid-template-columns:1fr; }
+      #omdApp.focus-fit .focus-resource-card{ min-height:520px; }
     }
 
     .focus-poster-panel[hidden],
@@ -1284,6 +1511,262 @@ th.left, td.left{
       .focus-poster-panel{ padding:8px; }
     }
 
+    /* 2026 compact UX refresh: a neutral, colour-coded control console. */
+    #omdApp.setup-fit{
+      background:#eef2f7;
+    }
+    #omdApp.setup-fit #setupView > .row{
+      grid-template-columns:minmax(300px, 330px) minmax(0, 1fr);
+      gap:10px;
+    }
+    #omdApp.setup-fit #setupView .controls{
+      height:100%;
+      padding:8px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      position:relative;
+      z-index:20;
+      overflow:visible;
+      background:linear-gradient(160deg,#f8fafc 0%,#eef2ff 100%);
+      border:1px solid #d8e0ec;
+      border-radius:15px;
+      box-shadow:0 8px 24px rgba(15,23,42,.07);
+    }
+    #omdApp.setup-fit #setupView .control{
+      --accent:#64748b;
+      margin:0;
+      padding:7px 8px;
+      background:#fff;
+      border:1px solid #e2e8f0;
+      border-left:4px solid var(--accent);
+      border-radius:10px;
+      box-shadow:0 2px 7px rgba(15,23,42,.045);
+    }
+    #appModeControl{ --accent:#8b5cf6 !important; }
+    #categoryControl{ --accent:#f97316 !important; }
+    #locationControl{ --accent:#3b82f6 !important; }
+    #hfwEditor{ --accent:#14b8a6 !important; }
+    #wordsPanel{ --accent:#ec4899 !important; }
+    #targetControl{ --accent:#06b6d4 !important; }
+    #timerControl{ --accent:#f59e0b !important; }
+    #orderControl{ --accent:#8b5cf6 !important; }
+    #startControl{ --accent:#22c55e !important; }
+    #focusOnly{ --accent:#22c55e !important; }
+
+    #omdApp.setup-fit #setupView .control h3{
+      margin:0 0 4px;
+      font-size:12px;
+      line-height:1.2;
+      color:#0f172a;
+    }
+    #omdApp.setup-fit #appModeControl > .hint,
+    #omdApp.setup-fit #categoryControl > .hint,
+    #omdApp.setup-fit #timerControl > .hint,
+    #omdApp.setup-fit #startControl > .hint{
+      display:none;
+    }
+    #omdApp.setup-fit #locationControl .row-small > div{
+      min-width:0 !important;
+    }
+    #omdApp.setup-fit #scopeHint,
+    #omdApp.setup-fit #targetHint{
+      display:block;
+      max-width:100%;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      margin-top:3px;
+      color:#475569;
+      font-size:9.5px;
+    }
+    #omdApp.setup-fit #setupView .seg{
+      display:grid;
+      grid-auto-flow:column;
+      grid-auto-columns:1fr;
+      gap:4px;
+      flex-wrap:nowrap;
+    }
+    #omdApp.setup-fit #setupView .seg button{
+      min-width:0;
+      min-height:28px;
+      padding:4px 5px;
+      border-radius:8px;
+      font-size:10px;
+      line-height:1.1;
+      white-space:nowrap;
+      box-shadow:none;
+    }
+    #omdApp.setup-fit #setupView .seg button.active{
+      border-color:var(--accent);
+      background:color-mix(in srgb, var(--accent) 13%, white);
+      color:#0f172a;
+      box-shadow:inset 0 0 0 1px var(--accent);
+    }
+    #omdApp.setup-fit #setupView select,
+    #omdApp.setup-fit #setupView input[type="number"]{
+      min-height:30px;
+      padding:4px 7px;
+      border-color:#cbd5e1;
+      border-radius:8px;
+      background:#f8fafc;
+      font-size:11px;
+    }
+    #omdApp.setup-fit #wordsPanel{ padding:6px 8px; }
+    #omdApp.setup-fit .wordsPickerLabel{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin:0 0 4px;
+      color:#9d174d;
+      font-size:11px;
+      font-weight:1000;
+    }
+    #omdApp.setup-fit .wordsPickerLabel > span{
+      color:#64748b;
+      font-size:9px;
+      white-space:nowrap;
+    }
+    #omdApp.setup-fit .wordsPickerRow{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:5px;
+      align-items:center;
+    }
+    #omdApp.setup-fit #wordsSelect{
+      width:100%;
+      min-height:38px;
+      padding:6px 9px;
+      border:2px solid #f9a8d4;
+      border-radius:10px;
+      background:#fff;
+      color:#111827;
+      font-size:14px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    #omdApp.setup-fit #wordsSelect:focus{
+      border-color:#db2777;
+      box-shadow:0 0 0 3px rgba(236,72,153,.16);
+    }
+    #omdApp.setup-fit #wordsSelect option{
+      color:#111827;
+      background:#fff;
+      font-size:16px;
+      font-weight:800;
+    }
+    #omdApp.setup-fit #playSelectedWordBtn{
+      min-height:38px;
+      padding:6px 9px;
+      border-radius:10px;
+      background:#db2777;
+      font-size:10px;
+      box-shadow:none;
+    }
+    #omdApp.setup-fit .selectedWordPreview{
+      min-height:20px;
+      margin-top:3px;
+      padding-left:2px;
+      display:flex;
+      align-items:center;
+      overflow:hidden;
+      color:#111827;
+      font-size:13px;
+      font-weight:1000;
+      white-space:nowrap;
+    }
+    #omdApp.setup-fit .selectedWordPreview:empty{ display:none; }
+    #omdApp.setup-fit .selectedWordPreview .sidPill{
+      padding:2px 5px;
+      margin-right:5px;
+      font-size:8px;
+    }
+
+    #omdApp.setup-fit #dashOnly{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:6px;
+    }
+    #omdApp.setup-fit #dashOnly > .control:last-of-type{ grid-column:auto; }
+    #omdApp.setup-fit #dashOnly > .credit{ grid-column:1 / -1; }
+    #omdApp.setup-fit #dashOnly .row-small{
+      gap:4px;
+    }
+    #omdApp.setup-fit #targetControl .row-small > div:first-child{
+      min-width:52px !important;
+    }
+    #omdApp.setup-fit #targetControl label.hint{ display:none; }
+    #omdApp.setup-fit #autoTargetBtn{
+      min-height:30px;
+      padding:4px 7px;
+      font-size:9.5px;
+      border-radius:8px;
+    }
+    #omdApp.setup-fit #timerControl .row-small,
+    #omdApp.setup-fit #orderControl .row-small{
+      display:grid;
+      gap:2px;
+      align-content:start;
+    }
+    #omdApp.setup-fit #timerControl label,
+    #omdApp.setup-fit #orderControl label{
+      font-size:10px;
+      line-height:1.25;
+      white-space:nowrap;
+    }
+    #omdApp.setup-fit #startControl .row-small{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+    }
+    #omdApp.setup-fit #startBtn,
+    #omdApp.setup-fit #resetBtn{
+      min-width:0;
+      min-height:34px;
+      padding:5px 6px;
+      border-radius:8px;
+      font-size:10px;
+      box-shadow:none;
+    }
+    #omdApp.setup-fit #focusOnly .btn.big{
+      min-width:0 !important;
+      width:100%;
+      padding:8px;
+      font-size:12px;
+    }
+    #omdApp.setup-fit #hfwEditor{
+      padding:6px 8px;
+    }
+    #omdApp.setup-fit #hfwEditor > .hint{ display:none; }
+    #omdApp.setup-fit #hfwEditor textarea{
+      min-height:42px;
+      max-height:52px;
+    }
+    #omdApp.setup-fit #hfwEditor .row-small{ margin-top:4px !important; }
+    #omdApp.setup-fit .credit{
+      margin:0;
+      color:#64748b;
+      font-size:8.5px;
+    }
+    #omdApp.setup-fit #setupView .panel{
+      position:relative;
+      z-index:1;
+      background:#fff;
+      border-color:#d8e0ec;
+      box-shadow:0 8px 24px rgba(15,23,42,.06);
+    }
+    #omdApp.setup-fit #setupView .panel table{ background:#fff; }
+    #omdApp.setup-fit #setupView .panel .typeCell{ background:#f8fafc; }
+
+    @media (max-height:760px) and (min-width:761px){
+      #omdApp.setup-fit #setupView .controls{ gap:4px; padding:6px; }
+      #omdApp.setup-fit #setupView .control{ padding:5px 7px; }
+      #omdApp.setup-fit #setupView .control h3{ font-size:11px; margin-bottom:3px; }
+      #omdApp.setup-fit #setupView .seg button{ min-height:25px; font-size:9px; }
+      #omdApp.setup-fit #scopeHint,
+      #omdApp.setup-fit #targetHint{ display:none; }
+      #omdApp.setup-fit .credit{ display:none; }
+    }
   </style>
 
   <script src="https://cdn.counter.dev/script.js" data-id="825e93b6-ce99-40ef-8bcc-125f13297433" data-utcoffset="8"></script>
@@ -1326,7 +1809,7 @@ th.left, td.left{
     </div>
   </div>
 
-  <div id="omdApp">
+  <div id="omdApp" class="setup-fit">
     <header>
       <h1>🏃‍♂️ One Minute Dash</h1>
       <p>
@@ -1341,12 +1824,12 @@ th.left, td.left{
             <span id="soundLabel">Sound: OFF</span>
           </div>
 
-          <button class="btn ghost small" id="exportBtn" type="button">Download JSON</button>
-          <button class="btn ghost small" id="importBtn" type="button">Import JSON</button>
-          <button class="btn warn small" id="clearHistoryBtn" type="button">Clear history</button>
+          <button class="btn export small" id="exportBtn" type="button" title="Download a backup of all records">⬇ Download JSON</button>
+          <button class="btn import small" id="importBtn" type="button" title="Restore records from a JSON backup">⬆ Import JSON</button>
+          <button class="btn warn small" id="clearHistoryBtn" type="button" title="Erase saved Dash history">🧹 Clear history</button>
 
-          <button class="btn ghost small" id="newSessionBtn" type="button">New session (clear SLS attempt)</button>
-          <a class="btn ghost small" href="https://limkimsze-maker.github.io/P3_SDR_Spelling/" target="_blank" rel="noopener">SDR Spelling</a>
+          <button class="btn session small" id="newSessionBtn" type="button" title="Begin a clean SLS attempt">✨ New session</button>
+          <a class="btn spelling small" href="https://limkimsze-maker.github.io/P3_SDR_Spelling/" target="_blank" rel="noopener">✏️ SDR Spelling</a>
 
           <input id="importFile" type="file" accept="application/json" class="hidden" style="display:none;">
         </div>
@@ -1358,29 +1841,29 @@ th.left, td.left{
     <section id="setupView" class="view active">
       <div class="row">
         <section class="controls">
-          <div class="control">
+          <div class="control" id="appModeControl">
   <h3>0) Mode</h3>
   <div class="seg" aria-label="Select app mode">
-    <button id="appDashBtn" type="button" class="active">🏃 One Minute Dash</button>
-    <button id="appFocusBtn" type="button">🎯 Focus of the Day</button>
+    <button id="appDashBtn" type="button" class="active" title="Timed or untimed rapid reading practice">🏃 Dash</button>
+    <button id="appFocusBtn" type="button" title="Teach the selected lesson one item at a time">🎯 Focus</button>
   </div>
-  <div class="hint">Pick a mode first. Selected mode will be highlighted in red.</div>
+  <div class="hint">Choose Dash or Focus. Your selection is highlighted.</div>
 </div>
 
-<div class="control">
+<div class="control" id="categoryControl">
   <h3>1) Category</h3>
   <div class="seg" aria-label="Select item type">
-    <button id="modeP" type="button" class="active">P — Phonograms</button>
-    <button id="modeH" type="button">HFW — High Frequency Words</button>
-    <button id="modeW" type="button">Words</button>
+    <button id="modeP" type="button" class="active" title="Practise phonograms taught up to the selected lesson">Phonograms</button>
+    <button id="modeH" type="button" title="Practise high-frequency words taught up to the selected lesson">HFW</button>
+    <button id="modeW" type="button" title="Practise words from the current and previous two lessons">Words</button>
   </div>
   <div class="hint" id="modeHint">
-    Phonograms + HFW use a cumulative scope (all taught up to that point). Words uses <b>current session/level + previous 2 sessions/levels</b>.
+    Phonograms/HFW include everything taught so far. Words include the <b>current + previous 2 lessons</b>.
   </div>
 </div>
 
 
-          <div class="control">
+          <div class="control" id="locationControl">
             <h3>2) We are at (Cycle & Session / Level)</h3>
             <div class="row-small">
   <div style="flex:1; min-width:140px;">
@@ -1421,34 +1904,33 @@ th.left, td.left{
           </div>
 
           <div class="control" id="wordsPanel" style="display:none;">
-            <h3>Words database — <span id="wordsSidLabel">C1S1</span></h3>
-            <div class="hint">
-              Each word shows its session/level tag (e.g., <b>C1S1</b> or <b>C19 Level 1</b>). ▶ uses TTS.
-              <span style="color:var(--vowel);font-weight:1000;">Vowels/vowel teams/magic-e/r-controlled/igh</span> are red,
-              <span style="color:var(--prefix);font-weight:1000;">prefixes</span> (per lesson) are green,
-              <span style="color:var(--suffix);font-weight:1000;">suffixes</span> (per lesson) are blue.
+            <label class="wordsPickerLabel" for="wordsSelect">
+              Words database
+              <span><span id="wordsSidLabel">C1S1</span> · <span id="wordsCountLabel">0</span> words</span>
+            </label>
+            <div class="wordsPickerRow">
+              <select id="wordsSelect" aria-label="Choose a word from this lesson"></select>
+              <button class="btn primary small" id="playSelectedWordBtn" type="button" title="Hear the selected word">🔊 Play</button>
             </div>
-            <div id="wordsList" class="wordsList"></div>
+            <div id="selectedWordPreview" class="selectedWordPreview" aria-live="polite"></div>
           </div>
 <div id="dashOnly">
 
-          <div class="control">
+          <div class="control" id="targetControl">
             <h3>3) Target</h3>
             <div class="row-small">
-              <div style="flex:1; min-width:200px;">
+              <div style="flex:1; min-width:110px;">
                 <label class="hint" for="targetInput">Target number (goal)</label>
                 <input type="number" id="targetInput" min="0" value="0" />
               </div>
-</div>
-
               <div style="display:grid; gap:6px; align-content:end;">
-                <button class="btn ghost small" id="autoTargetBtn" type="button">Auto = scope size</button>
+                <button class="btn primary small" id="autoTargetBtn" type="button">Use scope size</button>
               </div>
             </div>
             <div class="hint" id="targetHint">—</div>
           </div>
 
-          <div class="control">
+          <div class="control" id="timerControl">
             <h3>4) Timer</h3>
             <div class="row-small">
               <label style="font-weight:900;"><input type="radio" name="timed" value="on" checked> Timer ON (60s)</label>
@@ -1457,7 +1939,7 @@ th.left, td.left{
             <div class="hint">Chart updates <b>only</b> when Timer is ON.</div>
           </div>
 
-          <div class="control">
+          <div class="control" id="orderControl">
             <h3>5) Order</h3>
             <div class="row-small">
               <label style="font-weight:900;"><input type="radio" name="order" value="sequence" checked> Sequence</label>
@@ -1465,20 +1947,19 @@ th.left, td.left{
             </div>
           </div>
 
-          <div class="control">
+          <div class="control" id="startControl">
             <h3>Start</h3>
             <div class="row-small">
-              <button class="btn ok" id="startBtn" type="button">Start</button>
-              <button class="btn ghost" id="resetBtn" type="button">Reset selection</button>
+              <button class="btn ok" id="startBtn" type="button">▶ Start</button>
+              <button class="btn reset" id="resetBtn" type="button">↺ Reset</button>
             </div>
             <div class="hint" id="startHint">
-              Chart tracks Target vs Actual for each Cycle & Session (Timed only). Records are saved locally in this browser.
+              Timed results are saved automatically and added to the chart.
             </div>
           </div>
 
           <div class="credit">
-            Designed by Lim Kim Sze © 2026.<br>
-            (Phonogram audio uses your existing <code>audio/</code> folder if present; HFW tries <code>audio/words/</code> then speech; Words uses <b>TTS</b>.)
+            Designed by Lim Kim Sze © 2026.
           </div>
         </section>
 
@@ -1596,10 +2077,13 @@ th.left, td.left{
 
     <section id="dashView" class="view">
       <div class="dashCard">
-        <div class="row-small" style="width:100%; justify-content:space-between; gap:10px;">
+        <div class="dash-top-row">
           <button class="btn ghost small" id="backSetupFromDash" type="button">← Back</button>
           <div class="timer" id="timerTxt" aria-live="polite">01:00</div>
-          <button class="btn ghost small" id="pauseBtn" type="button" title="Pausing stops the timer">Pause</button>
+          <div class="dash-top-actions">
+            <button class="btn ghost small" id="dashSoundBtn" type="button" role="switch" aria-checked="false" title="Turn sound on or off">🔇 Sound: OFF</button>
+            <button class="btn ghost small" id="pauseBtn" type="button" title="Pausing stops the timer">Pause</button>
+          </div>
         </div>
 
         <div class="kpi" id="kpiLine">
@@ -1979,6 +2463,7 @@ th.left, td.left{
 
     const soundToggle = document.getElementById('soundToggle');
     const soundLabel  = document.getElementById('soundLabel');
+    const dashSoundBtn = document.getElementById('dashSoundBtn');
     let SOUND_ON = false;
 
     function loadChartOverrides(){
@@ -2031,12 +2516,17 @@ th.left, td.left{
       soundToggle.classList.toggle('on', SOUND_ON);
       soundToggle.setAttribute('aria-checked', SOUND_ON ? 'true' : 'false');
       soundLabel.textContent = SOUND_ON ? 'Sound: ON' : 'Sound: OFF';
+      if(dashSoundBtn){
+        dashSoundBtn.classList.toggle('on', SOUND_ON);
+        dashSoundBtn.setAttribute('aria-checked', SOUND_ON ? 'true' : 'false');
+        dashSoundBtn.textContent = SOUND_ON ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+      }
       try{ localStorage.setItem(KEY_SOUND, SOUND_ON ? '1':'0'); }catch(e){}
     }
+    // Always begin each fresh page load with sound off. Teachers can turn it on
+    // from either sound control whenever audio is needed.
     (function initSound(){
-      let v = null;
-      try{ v = localStorage.getItem(KEY_SOUND); }catch(e){}
-      setSound(v === '1');
+      setSound(false);
     })();
 
     function toggleSound(){ setSound(!SOUND_ON); }
@@ -2048,6 +2538,12 @@ soundToggle.addEventListener('click', ()=>{
     soundToggle.addEventListener('keydown', (e)=>{
       if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleSound(); }
     });
+    if(dashSoundBtn){
+      dashSoundBtn.addEventListener('click', ()=>{
+        toggleSound();
+        if(SOUND_ON) unlockSpeech();
+      });
+    }
 
     const AUDIO_BASE = 'audio/';
     const WORD_BASE  = 'audio/words/';
@@ -2844,7 +3340,10 @@ soundToggle.addEventListener('click', ()=>{
     const hfwEditor = document.getElementById('hfwEditor');
     const wordsPanel = document.getElementById('wordsPanel');
     const wordsSidLabel = document.getElementById('wordsSidLabel');
-    const wordsList = document.getElementById('wordsList');
+    const wordsCountLabel = document.getElementById('wordsCountLabel');
+    const wordsSelect = document.getElementById('wordsSelect');
+    const playSelectedWordBtn = document.getElementById('playSelectedWordBtn');
+    const selectedWordPreview = document.getElementById('selectedWordPreview');
 
    
     const cycleSel  = document.getElementById('cycleSel');
@@ -3039,7 +3538,7 @@ if(focusStartBtn){
     });
 
     function updateStartButtonLabel(){
-      startBtn.textContent = isTimed() ? 'Start 60s Dash' : 'Start (untimed)';
+      startBtn.textContent = isTimed() ? '▶ Start 60s Dash' : '▶ Start untimed';
     }
 
     function buildCycleSessionSelects(){
@@ -3127,36 +3626,41 @@ if(focusStartBtn){
       wordsSidLabel.textContent = displaySessionId(sid);
 
       const items = WORD_DB[sid] || [];
-      wordsList.innerHTML = '';
+      if(wordsCountLabel) wordsCountLabel.textContent = String(items.length);
+      wordsSelect.innerHTML = '';
 
       if(!items.length){
-        const p = document.createElement('div');
-        p.className = 'hint';
-        p.textContent = 'No words for this session yet (you can add later).';
-        wordsList.appendChild(p);
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'No words available';
+        wordsSelect.appendChild(option);
+        wordsSelect.disabled = true;
+        playSelectedWordBtn.disabled = true;
+        selectedWordPreview.innerHTML = '';
         return;
       }
 
+      wordsSelect.disabled = false;
+      playSelectedWordBtn.disabled = false;
       items.forEach(w=>{
-        const row = document.createElement('div');
-        row.className = 'wordRow';
-
-        const btn = document.createElement('button');
-        btn.className = 'btn ghost small';
-        btn.type = 'button';
-        btn.textContent = '▶';
-        btn.title = 'Play (TTS)';
-        btn.onclick = ()=> speak(w);
-
-        const text = document.createElement('div');
-        text.className = 'wordText';
-        text.innerHTML = renderWordWithSidHTML(sid, w, true);
-
-        row.appendChild(btn);
-        row.appendChild(text);
-        wordsList.appendChild(row);
+        const option = document.createElement('option');
+        option.value = w;
+        option.textContent = w;
+        wordsSelect.appendChild(option);
       });
+      updateSelectedWordPreview();
     }
+
+    function updateSelectedWordPreview(){
+      const word = wordsSelect.value;
+      const sid = currentSessionId();
+      selectedWordPreview.innerHTML = word ? renderWordWithSidHTML(sid, word, true) : '';
+      playSelectedWordBtn.disabled = !word;
+    }
+    wordsSelect.addEventListener('change', updateSelectedWordPreview);
+    playSelectedWordBtn.addEventListener('click', ()=>{
+      if(wordsSelect.value) speak(wordsSelect.value);
+    });
 
     function uniquePreserve(arr){
       const seen = new Set();
@@ -3230,6 +3734,7 @@ if(focusStartBtn){
       const pool = buildScopePool(upToId);
 
       scopeHint.textContent = scopeSummary(upToId, pool);
+      scopeHint.title = scopeHint.textContent;
 
       if(autoTarget){
         if(targetInput.dataset.locked !== '1'){
@@ -3239,6 +3744,7 @@ if(focusStartBtn){
 
       const t = parseInt(targetInput.value||'0',10);
       targetHint.textContent = `Scope size = ${pool.length}. Target goal = ${isNaN(t)?0:t}.`;
+      targetHint.title = targetHint.textContent;
 
       startBtn.classList.toggle('disabled', pool.length === 0);
       startBtn.disabled = (pool.length === 0);
@@ -3441,6 +3947,31 @@ if(focusStartBtn){
 
     let LAST_RESULT = null;
 
+    function teacherContentChanged(){
+      window.dispatchEvent(new Event('teacher:content-change'));
+    }
+
+    let focusFitRaf = 0;
+    function fitFocusDayToFrame(){
+      focusFitRaf = 0;
+      const app = document.getElementById('omdApp');
+      if(!app || !focusDayGrid || !dayView.classList.contains('active') || !app.classList.contains('focus-fit')) return;
+      if(window.innerWidth <= 900){
+        focusDayGrid.style.removeProperty('--focus-frame-height');
+        return;
+      }
+      const appRect = app.getBoundingClientRect();
+      const gridRect = focusDayGrid.getBoundingClientRect();
+      const gridTopInsideApp = gridRect.top - appRect.top + app.scrollTop;
+      const available = Math.floor(app.clientHeight - gridTopInsideApp - 10);
+      focusDayGrid.style.setProperty('--focus-frame-height', Math.max(420, available) + 'px');
+    }
+
+    function requestFocusFrameFit(){
+      if(focusFitRaf) cancelAnimationFrame(focusFitRaf);
+      focusFitRaf = requestAnimationFrame(fitFocusDayToFrame);
+    }
+
     function showRecordDetails(rec){
       LAST_RESULT = rec;
       const modeLabel = (rec.mode === 'P') ? 'Phonograms' : (rec.mode === 'HFW') ? 'High Frequency Words' : 'Words';
@@ -3454,6 +3985,8 @@ if(focusStartBtn){
     }
 
     function switchView(name){
+      /* Never carry an annotation into a different lesson screen. */
+      teacherContentChanged();
       [setupView, dayView, dashView, resultView, reviewView, remainingView].forEach(v=>v.classList.remove('active'));
       if(name==='setup') setupView.classList.add('active');
       if(name==='day') dayView.classList.add('active');
@@ -3461,8 +3994,24 @@ if(focusStartBtn){
       if(name==='result') resultView.classList.add('active');
       if(name==='review') reviewView.classList.add('active');
       if(name==='remaining') remainingView.classList.add('active');
+      const appScroller = document.getElementById('omdApp');
+      if(appScroller){
+        appScroller.classList.toggle('setup-fit', name === 'setup');
+        appScroller.classList.toggle('focus-fit', name === 'day');
+        appScroller.classList.toggle('dash-fit', name === 'dash');
+        appScroller.scrollTop = 0;
+      }
+      if(name === 'day'){
+        requestFocusFrameFit();
+        requestAnimationFrame(requestFocusFrameFit);
+      } else if(focusDayGrid){
+        focusDayGrid.style.removeProperty('--focus-frame-height');
+      }
       window.scrollTo({top:0, behavior:'smooth'});
     }
+
+    window.addEventListener('resize', requestFocusFrameFit);
+    if(window.visualViewport) window.visualViewport.addEventListener('resize', requestFocusFrameFit);
 
     function showFx(title, sub){
       fxTitle.textContent = title || 'Drumroll…';
@@ -3625,6 +4174,7 @@ if(focusStartBtn){
       const visibleCount = focusResourceCards.filter(card => !card.hidden && card.style.display !== 'none').length;
       focusDayGrid.style.setProperty('--focus-item-count', String(Math.max(1, visibleCount)));
       focusDayGrid.dataset.visibleItems = String(visibleCount);
+      requestFocusFrameFit();
     }
 
     function updatePosterRestoreButton(){
@@ -3759,6 +4309,7 @@ if(focusStartBtn){
       if(!DAY) return;
       const it = DAY.list[DAY.idx] ?? '';
       const sid = DAY.sid;
+      teacherContentChanged();
 
       dayCountHint.textContent = `Item ${DAY.idx+1} of ${DAY.list.length} • ${displaySessionId(sid)}`;
 
@@ -3938,6 +4489,7 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
       const reviewing = !!(DASH && DASH.reviewingPrevious);
       const idx = reviewing ? DASH.reviewIdx : (DASH ? DASH.idx : -1);
       const it = displayedDashItem();
+      teacherContentChanged();
       if(!it){
         dashItem.textContent = '—';
         dashProgress.textContent = '—';
@@ -4316,6 +4868,7 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
 
     function showRemainingItem(){
       const it = REMAIN.list[REMAIN.idx];
+      teacherContentChanged();
       if(REMAIN.mode === 'W'){
         const d = decodeWordItem(it);
         remainItem.classList.add('hasSid');
@@ -4544,55 +5097,59 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
 
   <!-- Teacher Annotation Tools -->
   <canvas id="teacherDrawCanvas" aria-hidden="true"></canvas>
-  <div id="teacherDrawTools" class="tdraw-toolbar" aria-label="Teacher annotation toolbar">
-    <div class="tdraw-head" id="teacherDrawDragHandle" title="Drag to move the toolbar">
-      <div class="tdraw-title">✏️ Teacher Drawing Tools</div>
-      <div class="tdraw-row" style="gap:6px;">
-        <button class="tdraw-btn" id="tdrawCollapse" type="button" title="Collapse toolbar">▾</button>
-      </div>
+  <div id="teacherDrawTools" class="tdraw-toolbar" role="toolbar" aria-label="Teacher drawing tools">
+    <div class="tdraw-group" aria-label="Annotation tools">
+      <button class="tdraw-btn active" type="button" data-tdraw-tool="pointer" title="Pointer / scroll (default)" aria-label="Pointer and scroll">
+        <svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l12 10-6.2 1.1L8 20z" fill="#fff" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="tdraw-btn" type="button" data-tdraw-tool="select" title="Select and erase annotations" aria-label="Select and erase annotations">
+        <svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4" width="13" height="12" rx="1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.5 2"/><path d="M11 10l9 7.5-4.5.8-2 3.7z" fill="#fff" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="tdraw-btn" type="button" data-tdraw-tool="pen" title="Pen" aria-label="Pen">
+        <svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18.8l1-4.2L16.8 3.8a1.8 1.8 0 012.5 0l.9.9a1.8 1.8 0 010 2.5L9.4 18z" fill="#ef4444" stroke="currentColor" stroke-width="1.4"/><path d="M5 18.8c2.2-.3 3.5-.2 5 .8-2.3.5-4.4.9-6.4.2" fill="none" stroke="#ef4444" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <button class="tdraw-btn" type="button" data-tdraw-tool="highlighter" title="Highlighter" aria-label="Highlighter">
+        <svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8v12l-2 3h-4l-2-3z" fill="#fde047" stroke="currentColor" stroke-width="1.4"/><path d="M7 21h10" stroke="#facc15" stroke-width="3" stroke-linecap="round"/></svg>
+      </button>
+      <button class="tdraw-btn" type="button" data-tdraw-tool="eraser" title="Eraser" aria-label="Eraser">
+        <svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 14.5L13 6a2 2 0 012.8 0l3.2 3.2a2 2 0 010 2.8l-6.5 6.5H8.5z" fill="#f9a8d4" stroke="currentColor" stroke-width="1.4"/><path d="M12.5 18.5H21" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="tdraw-btn" type="button" data-tdraw-tool="line" title="Straight line" aria-label="Straight line">
+        <svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20L20 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="tdraw-btn" type="button" data-tdraw-tool="arrow" title="Arrow" aria-label="Arrow">
+        <svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20L19 5M12 5h7v7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="tdraw-btn" type="button" data-tdraw-tool="rect" title="Box" aria-label="Box">
+        <svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+      </button>
+      <button class="tdraw-btn" type="button" data-tdraw-tool="ellipse" title="Circle / oval" aria-label="Circle or oval">
+        <svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="12" rx="8" ry="7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+      </button>
+      <button class="tdraw-btn" type="button" data-tdraw-tool="text" title="Text: type in the box, then click where it should appear" aria-label="Text tool">T</button>
     </div>
-    <div class="tdraw-body">
-      <div class="tdraw-row" role="toolbar" aria-label="Drawing tools">
-        <span class="tdraw-label">Tools</span>
-        <button class="tdraw-btn active" type="button" data-tdraw-tool="pen">Pen</button>
-        <button class="tdraw-btn" type="button" data-tdraw-tool="highlighter">Highlighter</button>
-        <button class="tdraw-btn" type="button" data-tdraw-tool="eraser">Eraser</button>
-        <button class="tdraw-btn" type="button" data-tdraw-tool="line">Line</button>
-        <button class="tdraw-btn" type="button" data-tdraw-tool="arrow">Arrow</button>
-        <button class="tdraw-btn" type="button" data-tdraw-tool="rect">Box</button>
-        <button class="tdraw-btn" type="button" data-tdraw-tool="ellipse">Circle</button>
-        <button class="tdraw-btn" type="button" data-tdraw-tool="text">Text</button>
-        <button class="tdraw-btn" type="button" data-tdraw-tool="pointer">Pointer</button>
-      </div>
-
-      <div class="tdraw-row">
-        <span class="tdraw-label">Colour</span>
-        <input class="tdraw-color" id="tdrawColor" type="color" value="#ef4444" title="Choose colour">
-        <button class="tdraw-swatch active" type="button" data-tdraw-colour="#ef4444" style="background:#ef4444" aria-label="Red"></button>
-        <button class="tdraw-swatch" type="button" data-tdraw-colour="#2563eb" style="background:#2563eb" aria-label="Blue"></button>
-        <button class="tdraw-swatch" type="button" data-tdraw-colour="#16a34a" style="background:#16a34a" aria-label="Green"></button>
-        <button class="tdraw-swatch" type="button" data-tdraw-colour="#f59e0b" style="background:#f59e0b" aria-label="Amber"></button>
-        <button class="tdraw-swatch" type="button" data-tdraw-colour="#111827" style="background:#111827" aria-label="Black"></button>
-        <button class="tdraw-swatch" type="button" data-tdraw-colour="#ffffff" style="background:#ffffff" aria-label="White"></button>
-      </div>
-
-      <div class="tdraw-row">
-        <span class="tdraw-label">Tip size</span>
-        <input class="tdraw-range" id="tdrawSize" type="range" min="2" max="48" step="1" value="6">
-        <span class="tdraw-size-pill" id="tdrawSizeLabel">6 px</span>
-      </div>
-
-      <div class="tdraw-row">
-        <span class="tdraw-label">Actions</span>
-        <button class="tdraw-btn" id="tdrawUndo" type="button" disabled>↶ Undo</button>
-        <button class="tdraw-btn" id="tdrawRedo" type="button" disabled>↷ Redo</button>
-        <button class="tdraw-btn" id="tdrawHide" type="button">Hide ink</button>
-        <button class="tdraw-btn danger" id="tdrawClear" type="button">Clear all</button>
-      </div>
-
-      <div class="tdraw-note">
-        Buttons, sliders and lesson controls remain clickable. To annotate, start drawing on the card/background, not directly on a button. The mouse pointer changes to match the selected tool.
-      </div>
+    <div class="tdraw-group" aria-label="Text settings">
+      <input class="tdraw-text-input" id="tdrawText" type="text" maxlength="80" placeholder="Type text…" title="Type text, choose the T tool, then click to place it" aria-label="Annotation text">
+    </div>
+    <div class="tdraw-group" aria-label="Ink settings">
+      <select class="tdraw-select" id="tdrawSize" title="Tip size" aria-label="Tip size">
+        <option value="2">2 px</option>
+        <option value="4">4 px</option>
+        <option value="6" selected>6 px</option>
+        <option value="8">8 px</option>
+        <option value="12">12 px</option>
+        <option value="18">18 px</option>
+        <option value="24">24 px</option>
+        <option value="36">36 px</option>
+        <option value="48">48 px</option>
+      </select>
+      <input class="tdraw-color" id="tdrawColor" type="color" value="#ef4444" title="Colour" aria-label="Ink colour">
+    </div>
+    <div class="tdraw-group" aria-label="Annotation actions">
+      <button class="tdraw-btn" id="tdrawUndo" type="button" title="Undo" aria-label="Undo" disabled>↶</button>
+      <button class="tdraw-btn" id="tdrawRedo" type="button" title="Redo" aria-label="Redo" disabled>↷</button>
+      <button class="tdraw-btn" id="tdrawHide" type="button" title="Hide annotations" aria-label="Hide annotations">◉</button>
+      <button class="tdraw-btn danger" id="tdrawClear" type="button" title="Clear all annotations" aria-label="Clear all annotations">⌫</button>
     </div>
   </div>
 
@@ -4600,18 +5157,18 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
   (function(){
     const canvas = document.getElementById('teacherDrawCanvas');
     const toolbar = document.getElementById('teacherDrawTools');
-    const dragHandle = document.getElementById('teacherDrawDragHandle');
-    if (!canvas || !toolbar || !dragHandle) return;
+    if (!canvas || !toolbar) return;
 
     const ctx = canvas.getContext('2d');
     const state = {
       hidden:false,
-      tool:'pen',
+      tool:'pointer',
       color:'#ef4444',
       size:6,
       drawing:false,
       current:null,
       commands:[],
+      history:[],
       redo:[],
       dpr:Math.max(1, Math.min(3, window.devicePixelRatio || 1))
     };
@@ -4619,10 +5176,9 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
     const $ = (sel, root=document) => root.querySelector(sel);
     const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
-    const collapseBtn = $('#tdrawCollapse');
     const colorInput = $('#tdrawColor');
     const sizeInput = $('#tdrawSize');
-    const sizeLabel = $('#tdrawSizeLabel');
+    const textInput = $('#tdrawText');
     const undoBtn = $('#tdrawUndo');
     const redoBtn = $('#tdrawRedo');
     const hideBtn = $('#tdrawHide');
@@ -4660,7 +5216,9 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
     function updateLayerMode(){
       canvas.style.display = state.hidden ? 'none' : 'block';
       canvas.style.pointerEvents = 'none';
-      hideBtn.textContent = state.hidden ? 'Show ink' : 'Hide ink';
+      hideBtn.textContent = state.hidden ? '⊙' : '◉';
+      hideBtn.title = state.hidden ? 'Show annotations' : 'Hide annotations';
+      hideBtn.setAttribute('aria-label', hideBtn.title);
     }
 
     function cursorUrl(svg, hotspotX, hotspotY, fallback){
@@ -4674,37 +5232,31 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
       const stroke = color || '#ef4444';
       switch(tool){
         case 'pen': {
-          const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><g transform="translate(16 16) rotate(-28) translate(-16 -16)"><path d="M11 23 L8.8 28.4 L14.4 26.2 L24.8 15.8 L21.4 12.4 Z" fill="${stroke}" stroke="#0f172a" stroke-width="1.3" stroke-linejoin="round"/><path d="M21.4 12.4 L24 9.8 Q25.8 8 27.4 9.6 L27.6 9.8 Q29.2 11.4 27.4 13.2 L24.8 15.8 Z" fill="#f8fafc" stroke="#0f172a" stroke-width="1.3" stroke-linejoin="round"/><path d="M8.8 28.4 L10.5 24.4 L12.8 26.7 Z" fill="#fde68a" stroke="#0f172a" stroke-width="1.1" stroke-linejoin="round"/></g></svg>`;
-          return cursorUrl(svg, 3, 29, 'crosshair');
+          /* The nib ends at (2,29), exactly matching the CSS cursor hotspot. */
+          const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M2 29L5.4 20.8 22.8 3.4a2 2 0 012.8 0l3 3a2 2 0 010 2.8L11.2 26.6z" fill="${stroke}" stroke="#0f172a" stroke-width="1.25" stroke-linejoin="round"/><path d="M5.4 20.8l5.8 5.8L2 29z" fill="#fde68a" stroke="#0f172a" stroke-width="1.05" stroke-linejoin="round"/><path d="M2 29l2.3-2.3" stroke="#0f172a" stroke-width="1.7" stroke-linecap="round"/></svg>`;
+          return cursorUrl(svg, 2, 29, 'crosshair');
         }
         case 'highlighter': {
-          const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><g transform="translate(16 16) rotate(-28) translate(-16 -16)"><rect x="11" y="8" width="11" height="12" rx="2.4" fill="${stroke}" stroke="#0f172a" stroke-width="1.3"/><rect x="11" y="18.5" width="11" height="4.7" rx="1.5" fill="#fef3c7" stroke="#0f172a" stroke-width="1.1"/><path d="M12.2 23.2 H20.8 L19.6 27 H13.4 Z" fill="#f59e0b" fill-opacity="0.35" stroke="#b45309" stroke-width="0.9"/></g></svg>`;
-          return cursorUrl(svg, 3, 29, 'crosshair');
+          /* The centre of the flat chisel edge is (6,29), the drawing point. */
+          const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M3 25L20.8 3.5a2 2 0 012.8-.3l4 3.3a2 2 0 01.3 2.8L10 30z" fill="${stroke}" stroke="#0f172a" stroke-width="1.25" stroke-linejoin="round"/><path d="M3 25l7 5H3z" fill="#fef3c7" stroke="#0f172a" stroke-width="1.05" stroke-linejoin="round"/><path d="M3 29h6" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+          return cursorUrl(svg, 6, 29, 'crosshair');
         }
         case 'eraser': {
-          const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><g transform="translate(16 16) rotate(-35) translate(-16 -16)"><path d="M9 12.8 L15.5 6.4 Q17.1 4.8 18.8 6.4 L25.6 13.2 Q27.2 14.8 25.6 16.4 L18.8 23.2 Q17.2 24.8 15.5 23.2 L8.8 16.5 Q7.2 14.9 8.8 13.3 Z" fill="#f8fafc" stroke="#0f172a" stroke-width="1.3"/><path d="M13.2 10.6 L21.4 18.8" stroke="#cbd5e1" stroke-width="2"/><path d="M17.2 24.1 H26.6" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"/></g></svg>`;
-          return cursorUrl(svg, 4, 28, 'crosshair');
+          /* The centre of the erasing edge is (6,28), the eraser path centre. */
+          const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M2.5 23L18.7 4.5a2.1 2.1 0 013-.2l6 5.2a2.1 2.1 0 01.2 3L12.2 30H4.5z" fill="#f9a8d4" stroke="#0f172a" stroke-width="1.25" stroke-linejoin="round"/><path d="M12.2 30H4.5l-2-7 4.4-5 9.6 8.4z" fill="#f8fafc" stroke="#0f172a" stroke-width="1.05" stroke-linejoin="round"/><path d="M3 28h6" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+          return cursorUrl(svg, 6, 28, 'crosshair');
         }
-        case 'line': {
-          const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M6 26 L26 6" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/><circle cx="6" cy="26" r="2.7" fill="#fff" stroke="#0f172a" stroke-width="1.2"/><circle cx="26" cy="6" r="2.7" fill="#fff" stroke="#0f172a" stroke-width="1.2"/></svg>`;
-          return cursorUrl(svg, 6, 26, 'crosshair');
-        }
-        case 'arrow': {
-          const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M6 26 L22 10" stroke="${stroke}" stroke-width="3" stroke-linecap="round"/><path d="M19 10 H26 V17" fill="none" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-          return cursorUrl(svg, 6, 26, 'crosshair');
-        }
-        case 'rect': {
-          const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect x="7" y="8" width="18" height="15" rx="1.5" fill="none" stroke="${stroke}" stroke-width="2.6" stroke-dasharray="2 1.2"/></svg>`;
-          return cursorUrl(svg, 8, 24, 'crosshair');
-        }
-        case 'ellipse': {
-          const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><ellipse cx="16" cy="16" rx="10" ry="7.4" fill="none" stroke="${stroke}" stroke-width="2.6" stroke-dasharray="2 1.2"/></svg>`;
-          return cursorUrl(svg, 8, 24, 'crosshair');
-        }
+        case 'line':
+        case 'arrow':
+        case 'rect':
+        case 'ellipse':
+        case 'select':
+          /* A system crosshair has its hotspot at its exact centre. */
+          return 'crosshair';
         case 'text':
           return 'text';
         case 'pointer':
-          return 'pointer';
+          return 'default';
         default:
           return 'default';
       }
@@ -4717,14 +5269,10 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
     }
 
     function updateButtons(){
-      undoBtn.disabled = state.commands.length === 0;
+      undoBtn.disabled = state.history.length === 0;
       redoBtn.disabled = state.redo.length === 0;
-      sizeLabel.textContent = state.size + ' px';
       $$('.tdraw-btn[data-tdraw-tool]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.tdrawTool === state.tool);
-      });
-      $$('.tdraw-swatch').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tdrawColour.toLowerCase() === state.color.toLowerCase());
       });
       updateLayerMode();
       applyToolCursor();
@@ -4790,7 +5338,20 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
       }
 
       const pts = cmd.points || [];
-      if (['pen','highlighter','eraser'].includes(cmd.tool)){
+      if (cmd.tool === 'select' && pts.length >= 2){
+        const x = Math.min(pts[0].x, pts[1].x);
+        const y = Math.min(pts[0].y, pts[1].y);
+        const w = Math.abs(pts[1].x - pts[0].x);
+        const h = Math.abs(pts[1].y - pts[0].y);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 1;
+        ctx.setLineDash([7,5]);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#2563eb';
+        ctx.fillStyle = 'rgba(37,99,235,.10)';
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeRect(x, y, w, h);
+      } else if (['pen','highlighter','eraser'].includes(cmd.tool)){
         drawSmoothPath(pts);
       } else if (cmd.tool === 'line' && pts.length >= 2){
         ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); ctx.lineTo(pts[1].x, pts[1].y); ctx.stroke();
@@ -4829,25 +5390,74 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
       if (extra) drawCommand(extra);
     }
 
-    function commit(cmd){
-      state.commands.push(cmd);
+    function checkpoint(){
+      state.history.push(state.commands.slice());
+      if (state.history.length > 60) state.history.shift();
       state.redo.length = 0;
+    }
+
+    function commit(cmd){
+      checkpoint();
+      state.commands.push(cmd);
       redraw();
       updateButtons();
     }
 
-    function flashPointer(point){
-      const pulse = document.createElement('div');
-      pulse.className = 'tdraw-pulse';
-      pulse.style.left = point.x + 'px';
-      pulse.style.top = point.y + 'px';
-      pulse.style.color = state.color;
-      document.body.appendChild(pulse);
-      window.setTimeout(() => pulse.remove(), 900);
+    function commandBounds(cmd){
+      const pts = cmd.points || [];
+      if (!pts.length) return null;
+      if (cmd.tool === 'text'){
+        const fontSize = Math.max(18, Math.min(72, (cmd.size || 6) * 4));
+        const width = Math.max(fontSize * .6, String(cmd.text || '').length * fontSize * .64);
+        return { left:pts[0].x, top:pts[0].y - fontSize, right:pts[0].x + width, bottom:pts[0].y + fontSize * .25 };
+      }
+      let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
+      pts.forEach(p=>{
+        left = Math.min(left, p.x); top = Math.min(top, p.y);
+        right = Math.max(right, p.x); bottom = Math.max(bottom, p.y);
+      });
+      const base = cmd.size || 6;
+      const pad = cmd.tool === 'highlighter' ? Math.max(7, base * 1.5)
+        : cmd.tool === 'eraser' ? Math.max(7, base * 1.3)
+        : cmd.tool === 'arrow' ? Math.max(8, base * 3.2)
+        : Math.max(3, base / 2);
+      return { left:left-pad, top:top-pad, right:right+pad, bottom:bottom+pad };
+    }
+
+    function selectionRect(points){
+      if (!points || points.length < 2) return null;
+      return {
+        left:Math.min(points[0].x, points[1].x),
+        top:Math.min(points[0].y, points[1].y),
+        right:Math.max(points[0].x, points[1].x),
+        bottom:Math.max(points[0].y, points[1].y)
+      };
+    }
+
+    function boxesIntersect(a,b){
+      return !!(a && b && a.left <= b.right && a.right >= b.left && a.top <= b.bottom && a.bottom >= b.top);
+    }
+
+    function eraseSelected(points){
+      const box = selectionRect(points);
+      if (!box || (box.right-box.left < 3 && box.bottom-box.top < 3)){
+        redraw();
+        return;
+      }
+      const kept = state.commands.filter(cmd => !boxesIntersect(commandBounds(cmd), box));
+      if (kept.length === state.commands.length){
+        redraw();
+        return;
+      }
+      checkpoint();
+      state.commands = kept;
+      redraw();
+      updateButtons();
     }
 
     function canStartAnnotation(e){
-      if (state.hidden || dragging) return false;
+      /* Pointer mode leaves the page completely normal: click, select and scroll. */
+      if (state.hidden || state.tool === 'pointer') return false;
       if (e.pointerType === 'mouse' && e.button !== 0) return false;
       const target = e.target;
       if (!target || !target.closest) return true;
@@ -4861,15 +5471,12 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
 
       const p = posFromEvent(e);
 
-      if (state.tool === 'pointer'){
-        flashPointer({ x:e.clientX, y:e.clientY });
-        return;
-      }
-
       if (state.tool === 'text'){
-        const text = window.prompt('Type the annotation text:');
+        const text = textInput ? textInput.value : '';
         if (text && text.trim()){
           commit({ tool:'text', color:state.color, size:state.size, text:text.trim(), points:[p] });
+        } else if (textInput){
+          textInput.focus();
         }
         return;
       }
@@ -4902,6 +5509,10 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
       state.drawing = false;
       state.current = null;
       const pts = cmd.points || [];
+      if (cmd.tool === 'select'){
+        eraseSelected(pts);
+        return;
+      }
       const shouldKeep = pts.length > 1 && distance(pts[0], pts[pts.length - 1]) > 1;
       if (shouldKeep) commit(cmd);
       else redraw();
@@ -4909,15 +5520,11 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
     document.addEventListener('pointerup', endPointer, true);
     document.addEventListener('pointercancel', endPointer, true);
 
-    collapseBtn.addEventListener('click', () => {
-      toolbar.classList.toggle('collapsed');
-      collapseBtn.textContent = toolbar.classList.contains('collapsed') ? '▸' : '▾';
-    });
-
     $$('.tdraw-btn[data-tdraw-tool]').forEach(btn => {
       btn.addEventListener('click', () => {
         state.tool = btn.dataset.tdrawTool;
         updateButtons();
+        if (state.tool === 'text' && textInput) textInput.focus();
       });
     });
 
@@ -4926,29 +5533,23 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
       updateButtons();
     });
 
-    $$('.tdraw-swatch').forEach(btn => {
-      btn.addEventListener('click', () => {
-        state.color = btn.dataset.tdrawColour;
-        colorInput.value = state.color;
-        updateButtons();
-      });
-    });
-
-    sizeInput.addEventListener('input', () => {
+    sizeInput.addEventListener('change', () => {
       state.size = parseInt(sizeInput.value, 10) || 6;
       updateButtons();
     });
 
     undoBtn.addEventListener('click', () => {
-      if (!state.commands.length) return;
-      state.redo.push(state.commands.pop());
+      if (!state.history.length) return;
+      state.redo.push(state.commands.slice());
+      state.commands = state.history.pop();
       redraw();
       updateButtons();
     });
 
     redoBtn.addEventListener('click', () => {
       if (!state.redo.length) return;
-      state.commands.push(state.redo.pop());
+      state.history.push(state.commands.slice());
+      state.commands = state.redo.pop();
       redraw();
       updateButtons();
     });
@@ -4960,41 +5561,25 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
 
     clearBtn.addEventListener('click', () => {
       if (!state.commands.length || window.confirm('Clear all annotations?')){
-        state.commands.length = 0;
-        state.redo.length = 0;
+        if (state.commands.length) checkpoint();
+        state.commands = [];
         redraw();
         updateButtons();
       }
     });
 
-    let dragging = false;
-    let dragOffset = {x:0, y:0};
-    dragHandle.addEventListener('pointerdown', (e) => {
-      if (e.target.closest('button')) return;
-      dragging = true;
-      const rect = toolbar.getBoundingClientRect();
-      dragOffset = { x:e.clientX - rect.left, y:e.clientY - rect.top };
-      toolbar.style.left = rect.left + 'px';
-      toolbar.style.top = rect.top + 'px';
-      toolbar.style.right = 'auto';
-      dragHandle.setPointerCapture(e.pointerId);
-    });
-    dragHandle.addEventListener('pointermove', (e) => {
-      if (!dragging) return;
-      const maxX = window.innerWidth - toolbar.offsetWidth - 8;
-      const maxY = window.innerHeight - 48;
-      const x = Math.max(8, Math.min(maxX, e.clientX - dragOffset.x));
-      const y = Math.max(8, Math.min(maxY, e.clientY - dragOffset.y));
-      toolbar.style.left = x + 'px';
-      toolbar.style.top = y + 'px';
-    });
-    function stopDrag(e){
-      if (!dragging) return;
-      dragging = false;
-      try { dragHandle.releasePointerCapture(e.pointerId); } catch(err) {}
+    function clearAnnotations(){
+      state.drawing = false;
+      state.current = null;
+      state.commands = [];
+      state.history.length = 0;
+      state.redo.length = 0;
+      redraw();
+      updateButtons();
     }
-    dragHandle.addEventListener('pointerup', stopDrag);
-    dragHandle.addEventListener('pointercancel', stopDrag);
+
+    /* Lesson views dispatch this whenever the displayed word/phonogram changes. */
+    window.addEventListener('teacher:content-change', clearAnnotations);
 
     document.addEventListener('keydown', (e) => {
       const tag = (document.activeElement && document.activeElement.tagName || '').toLowerCase();
