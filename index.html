@@ -4116,15 +4116,15 @@ if(focusStartBtn){
 
         const master = ctx.createGain();
         master.gain.setValueAtTime(0.0001, start);
-        master.gain.exponentialRampToValueAtTime(0.34, start + 0.08);
-        master.gain.setValueAtTime(0.34, start + Math.max(0.1, duration - 0.16));
+        master.gain.exponentialRampToValueAtTime(0.78, start + 0.08);
+        master.gain.setValueAtTime(0.78, start + Math.max(0.1, duration - 0.16));
         master.gain.exponentialRampToValueAtTime(0.0001, start + duration);
         master.connect(ctx.destination);
 
         const compressor = ctx.createDynamicsCompressor();
-        compressor.threshold.value = -18;
-        compressor.knee.value = 16;
-        compressor.ratio.value = 5;
+        compressor.threshold.value = -22;
+        compressor.knee.value = 14;
+        compressor.ratio.value = 4;
         compressor.attack.value = 0.003;
         compressor.release.value = 0.12;
         compressor.connect(master);
@@ -4172,13 +4172,13 @@ if(focusStartBtn){
         while(elapsed < duration - 0.13){
           const progress = elapsed / duration;
           const interval = 0.095 - (0.058 * progress);
-          const strength = 0.16 + (0.46 * progress);
+          const strength = 0.28 + (0.74 * progress);
           scheduleDrumHit(start + elapsed, strength);
           elapsed += interval;
           hitIndex++;
           if(hitIndex > 80) break;
         }
-        scheduleDrumHit(start + duration - 0.12, 0.85, true);
+        scheduleDrumHit(start + duration - 0.12, 1.25, true);
       }catch(e){
         /* The reveal still proceeds if a very old browser has no Web Audio. */
       }
