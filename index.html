@@ -1819,7 +1819,7 @@ th.left, td.left{
 
       <div class="topbar">
         <div class="row-small">
-          <div id="soundToggle" class="toggle" role="switch" aria-checked="false" tabindex="0" title="Sound is OFF by default">
+          <div id="soundToggle" class="toggle" role="switch" aria-checked="false" tabindex="0" title="Turn reading sounds on or off. The reveal drumroll plays automatically.">
             <span class="dot" aria-hidden="true"></span>
             <span id="soundLabel">Sound: OFF</span>
           </div>
@@ -2081,7 +2081,7 @@ th.left, td.left{
           <button class="btn ghost small" id="backSetupFromDash" type="button">← Back</button>
           <div class="timer" id="timerTxt" aria-live="polite">01:00</div>
           <div class="dash-top-actions">
-            <button class="btn ghost small" id="dashSoundBtn" type="button" role="switch" aria-checked="false" title="Turn sound on or off">🔇 Sound: OFF</button>
+            <button class="btn ghost small" id="dashSoundBtn" type="button" role="switch" aria-checked="false" title="Turn reading sounds on or off. The reveal drumroll plays automatically.">🔇 Sound: OFF</button>
             <button class="btn ghost small" id="pauseBtn" type="button" title="Pausing stops the timer">Pause</button>
           </div>
         </div>
@@ -4096,35 +4096,93 @@ if(focusStartBtn){
       window.addEventListener('resize', resize, { once:true });
     }
 
-   async function playDrumroll(durationMs=1200){
-  if(!SOUND_ON) return;
+    let drumAudioContext = null;
 
-  // ✅ Use your audio file instead of WebAudio noise
-  const DRUMROLL_FILE = "audio/drum roll 2.mp3";
+    /* Self-contained synthesized drumroll. This intentionally plays for the
+       reveal even while ordinary word/phonogram audio defaults to OFF. */
+    async function playDrumroll(durationMs=1200){
+      try{
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if(!AudioContextClass) return;
 
-  try{
-    const player = document.getElementById('player');
-    if(!player) return;
+        if(!drumAudioContext || drumAudioContext.state === 'closed'){
+          drumAudioContext = new AudioContextClass();
+        }
+        const ctx = drumAudioContext;
+        if(ctx.state === 'suspended') await ctx.resume();
 
-    // stop anything currently playing
-    try{ player.pause(); }catch(e){}
-    try{ player.currentTime = 0; }catch(e){}
+        const duration = Math.max(0.6, Math.min(2.2, Number(durationMs || 1200) / 1000));
+        const start = ctx.currentTime + 0.015;
 
-    player.src = DRUMROLL_FILE;
+        const master = ctx.createGain();
+        master.gain.setValueAtTime(0.0001, start);
+        master.gain.exponentialRampToValueAtTime(0.34, start + 0.08);
+        master.gain.setValueAtTime(0.34, start + Math.max(0.1, duration - 0.16));
+        master.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+        master.connect(ctx.destination);
 
-    // Play (needs user gesture; your fxBurst is triggered by button click so OK)
-    await player.play();
+        const compressor = ctx.createDynamicsCompressor();
+        compressor.threshold.value = -18;
+        compressor.knee.value = 16;
+        compressor.ratio.value = 5;
+        compressor.attack.value = 0.003;
+        compressor.release.value = 0.12;
+        compressor.connect(master);
 
-    // Stop after durationMs (so fxBurst timing still works)
-    if(Number.isFinite(durationMs) && durationMs > 0){
-      setTimeout(()=>{
-        try{ player.pause(); player.currentTime = 0; }catch(e){}
-      }, durationMs);
+        function scheduleDrumHit(when, strength, finalHit=false){
+          const hitLength = finalHit ? 0.18 : 0.075;
+          const frameCount = Math.max(1, Math.floor(ctx.sampleRate * hitLength));
+          const buffer = ctx.createBuffer(1, frameCount, ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for(let i=0;i<frameCount;i++){
+            const progress = i / frameCount;
+            const envelope = Math.pow(1 - progress, finalHit ? 2.1 : 3.8);
+            data[i] = (Math.random() * 2 - 1) * envelope;
+          }
+
+          const noise = ctx.createBufferSource();
+          noise.buffer = buffer;
+          const noiseFilter = ctx.createBiquadFilter();
+          noiseFilter.type = 'bandpass';
+          noiseFilter.frequency.value = finalHit ? 125 : 175;
+          noiseFilter.Q.value = finalHit ? 0.7 : 1.05;
+          const noiseGain = ctx.createGain();
+          noiseGain.gain.setValueAtTime(Math.max(0.001, strength), when);
+          noiseGain.gain.exponentialRampToValueAtTime(0.0001, when + hitLength);
+          noise.connect(noiseFilter).connect(noiseGain).connect(compressor);
+
+          const tone = ctx.createOscillator();
+          tone.type = 'sine';
+          tone.frequency.setValueAtTime(finalHit ? 105 : 135, when);
+          tone.frequency.exponentialRampToValueAtTime(finalHit ? 48 : 76, when + hitLength);
+          const toneGain = ctx.createGain();
+          toneGain.gain.setValueAtTime(strength * (finalHit ? 0.75 : 0.34), when);
+          toneGain.gain.exponentialRampToValueAtTime(0.0001, when + hitLength);
+          tone.connect(toneGain).connect(compressor);
+
+          noise.start(when);
+          noise.stop(when + hitLength);
+          tone.start(when);
+          tone.stop(when + hitLength);
+        }
+
+        /* Increasingly rapid hits create the roll and crescendo. */
+        let elapsed = 0;
+        let hitIndex = 0;
+        while(elapsed < duration - 0.13){
+          const progress = elapsed / duration;
+          const interval = 0.095 - (0.058 * progress);
+          const strength = 0.16 + (0.46 * progress);
+          scheduleDrumHit(start + elapsed, strength);
+          elapsed += interval;
+          hitIndex++;
+          if(hitIndex > 80) break;
+        }
+        scheduleDrumHit(start + duration - 0.12, 0.85, true);
+      }catch(e){
+        /* The reveal still proceeds if a very old browser has no Web Audio. */
+      }
     }
-  }catch(e){
-    // If file missing / blocked, silently ignore
-  }
-}
 
     async function fxBurst(title, sub, ms=1400){
       showFx(title, sub);
