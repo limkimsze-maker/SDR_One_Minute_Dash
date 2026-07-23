@@ -468,8 +468,36 @@
       letter-spacing:.2px;
       text-transform:lowercase;
     }
+    .phonExamples{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-wrap:wrap;
+      gap:4px 10px;
+      margin-top:1px;
+      font-size:15px;
+      line-height:1.35;
+      font-weight:700;
+      letter-spacing:.15px;
+      color:#334155;
+    }
+    .phonExampleWord{
+      white-space:nowrap;
+    }
+    .phonExampleMark{
+      color:#dc2626;
+      text-decoration-line:underline;
+      text-decoration-color:#dc2626;
+      text-decoration-thickness:2px;
+      text-underline-offset:2px;
+      font-weight:900;
+    }
     .review-card .phonSub{
       font-size:14px;
+    }
+    .review-card .phonExamples{
+      font-size:12px;
+      gap:3px 7px;
     }
 
     .bigItem.hasSid{
@@ -2656,10 +2684,141 @@ soundToggle.addEventListener('click', ()=>{
       return [phonogramDisplayLabel(item)];
     }
 
+    // One concise example for every taught sound. The marked ranges colour and
+    // underline only the target phonogram, so the main card remains uncluttered.
+    const PHONOGRAM_EXAMPLES = {
+      "a":       [{word:"apple", marks:[[0,1]]}, {word:"apron", marks:[[0,1]]}],
+      "e":       [{word:"egg", marks:[[0,1]]}, {word:"me", marks:[[1,2]]}],
+      "i":       [{word:"insect", marks:[[0,1]]}, {word:"tiger", marks:[[1,2]]}],
+      "o":       [{word:"octopus", marks:[[0,1]]}, {word:"open", marks:[[0,1]]}],
+      "u":       [{word:"umbrella", marks:[[0,1]]}, {word:"music", marks:[[1,2]]}],
+      "b":       [{word:"bat", marks:[[0,1]]}],
+      "c":       [{word:"cat", marks:[[0,1]]}, {word:"city", marks:[[0,1]]}],
+      "c-hard":  [{word:"cat", marks:[[0,1]]}],
+      "c-soft":  [{word:"city", marks:[[0,1]]}],
+      "d":       [{word:"dog", marks:[[0,1]]}],
+      "f":       [{word:"fish", marks:[[0,1]]}],
+      "g":       [{word:"gum", marks:[[0,1]]}, {word:"gem", marks:[[0,1]]}],
+      "g-hard":  [{word:"gum", marks:[[0,1]]}],
+      "g-soft":  [{word:"gem", marks:[[0,1]]}],
+      "h":       [{word:"hat", marks:[[0,1]]}],
+      "j":       [{word:"jam", marks:[[0,1]]}],
+      "k":       [{word:"kid", marks:[[0,1]]}],
+      "l":       [{word:"leg", marks:[[0,1]]}],
+      "m":       [{word:"map", marks:[[0,1]]}],
+      "n":       [{word:"net", marks:[[0,1]]}],
+      "p":       [{word:"pen", marks:[[0,1]]}],
+      "qu":      [{word:"queen", marks:[[0,2]]}],
+      "r":       [{word:"rat", marks:[[0,1]]}],
+      "s":       [{word:"cats", marks:[[3,4]]}, {word:"visited", marks:[[2,3]]}],
+      "t":       [{word:"tap", marks:[[0,1]]}],
+      "v":       [{word:"van", marks:[[0,1]]}],
+      "w":       [{word:"web", marks:[[0,1]]}],
+      "x":       [{word:"fox", marks:[[2,3]]}],
+      "y":       [{word:"yes", marks:[[0,1]]}, {word:"happy", marks:[[4,5]]}, {word:"my", marks:[[1,2]]}],
+      "y-vowel": [{word:"happy", marks:[[4,5]]}, {word:"my", marks:[[1,2]]}],
+      "z":       [{word:"zip", marks:[[0,1]]}],
+      "ch":      [{word:"chip", marks:[[0,2]]}],
+      "sh":      [{word:"ship", marks:[[0,2]]}],
+      "th":      [{word:"thin", marks:[[0,2]]}, {word:"this", marks:[[0,2]]}],
+      "-ff":     [{word:"puff", marks:[[2,4]]}],
+      "-ll":     [{word:"bell", marks:[[2,4]]}],
+      "-ss":     [{word:"kiss", marks:[[2,4]]}],
+      "-zz":     [{word:"buzz", marks:[[2,4]]}],
+      "-ck":     [{word:"duck", marks:[[2,4]]}],
+      "-tch":    [{word:"match", marks:[[2,5]]}],
+      "dge":     [{word:"badge", marks:[[2,5]]}],
+      "a-e":     [{word:"cake", marks:[[1,2],[3,4]]}],
+      "e-e":     [{word:"theme", marks:[[2,3],[4,5]]}],
+      "i-e":     [{word:"bike", marks:[[1,2],[3,4]]}],
+      "o-e":     [{word:"home", marks:[[1,2],[3,4]]}],
+      "u-e":     [{word:"cube", marks:[[1,2],[3,4]]}],
+      "-ble":    [{word:"table", marks:[[2,5]]}],
+      "-dle":    [{word:"candle", marks:[[3,6]]}],
+      "-ple":    [{word:"apple", marks:[[2,5]]}],
+      "-tle":    [{word:"bottle", marks:[[3,6]]}],
+      "-gle":    [{word:"wiggle", marks:[[3,6]]}],
+      "ar":      [{word:"car", marks:[[1,3]]}],
+      "or":      [{word:"fork", marks:[[1,3]]}],
+      "ir":      [{word:"bird", marks:[[1,3]]}],
+      "er":      [{word:"her", marks:[[1,3]]}],
+      "ur":      [{word:"turn", marks:[[1,3]]}],
+      "ai":      [{word:"rain", marks:[[1,3]]}],
+      "ay":      [{word:"play", marks:[[2,4]]}],
+      "ee":      [{word:"feet", marks:[[1,3]]}],
+      "ea":      [{word:"each", marks:[[0,2]]}, {word:"sweat", marks:[[2,4]]}],
+      "ea-short-e":[{word:"sweat", marks:[[2,4]]}],
+      "ie":      [{word:"pie", marks:[[1,3]]}, {word:"field", marks:[[1,3]]}],
+      "ei":      [{word:"receive", marks:[[3,5]]}, {word:"eight", marks:[[0,2]]}],
+      "ey":      [{word:"key", marks:[[1,3]]}, {word:"they", marks:[[2,4]]}],
+      "oa":      [{word:"boat", marks:[[1,3]]}],
+      "ow-long-o":[{word:"snow", marks:[[2,4]]}],
+      "oo":      [{word:"moon", marks:[[1,3]]}, {word:"book", marks:[[1,3]]}],
+      "ue":      [{word:"glue", marks:[[2,4]]}, {word:"cue", marks:[[1,3]]}],
+      "ue-u":    [{word:"cue", marks:[[1,3]]}],
+      "ew":      [{word:"screw", marks:[[3,5]]}, {word:"few", marks:[[1,3]]}],
+      "ew-u":    [{word:"few", marks:[[1,3]]}],
+      "ui":      [{word:"fruit", marks:[[2,4]]}],
+      "aw":      [{word:"claw", marks:[[2,4]]}],
+      "ou":      [{word:"cloud", marks:[[2,4]]}],
+      "ow":      [{word:"snow", marks:[[2,4]]}, {word:"cow", marks:[[1,3]]}],
+      "oi":      [{word:"coin", marks:[[1,3]]}],
+      "oy":      [{word:"toy", marks:[[1,3]]}],
+      "igh":     [{word:"light", marks:[[1,4]]}],
+      "kn":      [{word:"knee", marks:[[0,2]]}],
+      "ng":      [{word:"ring", marks:[[2,4]]}],
+      "nk":      [{word:"sink", marks:[[2,4]]}],
+      "-s":      [{word:"cats", marks:[[3,4]]}, {word:"dogs", marks:[[3,4]]}],
+      "-es":     [{word:"boxes", marks:[[3,5]]}],
+      "-ed":     [{word:"jumped", marks:[[4,6]]}, {word:"played", marks:[[4,6]]}, {word:"wanted", marks:[[4,6]]}],
+      "un-":     [{word:"unhappy", marks:[[0,2]]}],
+      "in-":     [{word:"inside", marks:[[0,2]]}],
+      "-ing":    [{word:"jumping", marks:[[4,7]]}],
+      "-ful":    [{word:"helpful", marks:[[4,7]]}],
+      "re-":     [{word:"replay", marks:[[0,2]]}],
+      "dis-":    [{word:"dislike", marks:[[0,3]]}],
+      "-er":     [{word:"taller", marks:[[4,6]]}],
+      "-est":    [{word:"tallest", marks:[[4,7]]}],
+      "mis-":    [{word:"mistake", marks:[[0,3]]}],
+      "pre-":    [{word:"preview", marks:[[0,3]]}],
+      "-less":   [{word:"careless", marks:[[4,8]]}]
+    };
+
+    function phonogramExamplesFor(item, currentSid){
+      const raw = String(item || '');
+      const rule = phonogramRule(raw);
+      const key = (rule?.group && phonogramHasTwoSoundsNow(raw, currentSid)) ? rule.group : raw;
+      const examples = PHONOGRAM_EXAMPLES[key] || PHONOGRAM_EXAMPLES[raw] || [];
+      return examples.slice(0, phonogramSoundCountNow(raw, currentSid));
+    }
+
+    function renderPhonogramExampleWord(example){
+      const word = String(example?.word || '');
+      const marked = new Array(word.length).fill(false);
+      (example?.marks || []).forEach(range=>{
+        const start = Math.max(0, Number(range?.[0] || 0));
+        const end = Math.min(word.length, Number(range?.[1] || 0));
+        for(let i=start; i<end; i++) marked[i] = true;
+      });
+
+      let html = '';
+      for(let i=0; i<word.length; i++){
+        const ch = escapeHTML(word[i]);
+        html += marked[i] ? `<span class="phonExampleMark">${ch}</span>` : ch;
+      }
+      return `<span class="phonExampleWord">${html}</span>`;
+    }
+
+    function renderPhonogramExamplesHTML(item, currentSid){
+      const examples = phonogramExamplesFor(item, currentSid);
+      if(!examples.length) return '';
+      return `<div class="phonExamples" aria-label="Example ${examples.length === 1 ? 'word' : 'words'}">${examples.map(renderPhonogramExampleWord).join('<span aria-hidden="true">•</span>')}</div>`;
+    }
+
     function renderPhonogramCardHTML(item, currentSid){
       const label = phonogramDisplayLabel(item);
       const count = phonogramSoundCountNow(item, currentSid);
-      return `<div class="phonCard"><div class="phonMain">${escapeHTML(label)}</div>${count >= 2 ? `<div class="phonSub">${count} sounds</div>` : ``}</div>`;
+      return `<div class="phonCard"><div class="phonMain">${escapeHTML(label)}</div>${count >= 2 ? `<div class="phonSub">${count} sounds</div>` : ``}${renderPhonogramExamplesHTML(item, currentSid)}</div>`;
     }
 
     function collapseTwoSoundPhonogramsForDash(items, upToId){
@@ -4376,6 +4535,11 @@ if(focusStartBtn){
         dayBig.innerHTML = renderWordWithSidHTML(sid, it, false);
         autoFitWordBox(dayBig, 22);
         focusPrepareOnsetRime(it);
+      } else if(DAY.kind === 'P'){
+        focusHideOnsetRimeTools();
+        dayBig.classList.remove('hasSid');
+        dayBig.style.fontSize = '';
+        dayBig.innerHTML = renderPhonogramCardHTML(it, sid);
       } else {
         focusHideOnsetRimeTools();
         dayBig.classList.remove('hasSid');
