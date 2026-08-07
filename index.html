@@ -483,6 +483,9 @@
       letter-spacing:.15px;
       color:#334155;
     }
+    body.phon-examples-hidden .phonExamples{
+      display:none !important;
+    }
     .phonExampleWord{
       white-space:nowrap;
     }
@@ -2132,6 +2135,7 @@ th.left, td.left{
           <div class="row-small" style="gap:8px; justify-content:flex-start;">
             <button class="btn ghost small" id="backFromDay" type="button">← Back</button>
             <button class="btn ghost small" id="focusShowPostersBtn" type="button" hidden>Show all posters</button>
+            <button class="btn ghost small phonExamplesToggleBtn" type="button" aria-pressed="false">Hide words</button>
           </div>
           <div style="font-weight:1000;" id="dayTitle">—</div>
           <div class="hint" id="daySub">—</div>
@@ -2223,6 +2227,7 @@ th.left, td.left{
           <div class="timer" id="timerTxt" aria-live="polite">01:00</div>
           <div class="dash-top-actions">
             <button class="btn ghost small" id="dashSoundBtn" type="button" role="switch" aria-checked="false" title="Turn reading sounds on or off. The reveal drumroll plays automatically.">🔇 Sound: OFF</button>
+            <button class="btn ghost small phonExamplesToggleBtn" type="button" aria-pressed="false">Hide words</button>
             <button class="btn ghost small" id="pauseBtn" type="button" title="Pausing stops the timer">Pause</button>
           </div>
         </div>
@@ -6125,6 +6130,32 @@ if(btnHFWD) btnHFWD.addEventListener('click', ()=> openDay('HFW'));
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
     updateButtons();
+  })();
+  </script>
+
+  <script>
+  (function(){
+    const buttons = Array.from(document.querySelectorAll('.phonExamplesToggleBtn'));
+    if (!buttons.length) return;
+
+    function setExampleWordsHidden(hidden){
+      document.body.classList.toggle('phon-examples-hidden', hidden);
+      buttons.forEach((button) => {
+        button.textContent = hidden ? 'Show words' : 'Hide words';
+        button.setAttribute('aria-pressed', String(hidden));
+        button.title = hidden
+          ? 'Show the example words under the phonograms'
+          : 'Hide the example words under the phonograms';
+      });
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => {
+        setExampleWordsHidden(!document.body.classList.contains('phon-examples-hidden'));
+      });
+    });
+
+    setExampleWordsHidden(false);
   })();
   </script>
 
