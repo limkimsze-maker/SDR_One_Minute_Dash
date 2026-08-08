@@ -2077,7 +2077,7 @@ th.left, td.left{
           <div class="control" id="timerControl">
             <h3>4) Timer</h3>
             <div class="row-small">
-              <label style="font-weight:900;"><input type="radio" name="timed" value="on" checked> Timer ON (60s)</label>
+              <label style="font-weight:900;"><input type="radio" name="timed" value="on" checked> Timer ON (60s — phonograms only)</label>
               <label style="font-weight:900;"><input type="radio" name="timed" value="off"> Timer OFF (own time)</label>
             </div>
             <div class="hint">Chart updates <b>only</b> when Timer is ON.</div>
@@ -3828,7 +3828,7 @@ if(focusStartBtn){
 
       targetInput.dataset.locked = '0';
 
-     
+      syncTimerForMode();
       syncHfwEditor();
       syncWordsPanel();
       updateScopePreview(true);
@@ -3843,6 +3843,22 @@ if(focusStartBtn){
       const el = document.querySelector('input[name="timed"]:checked');
       return el ? (el.value === 'on') : true;
     }
+
+    function syncTimerForMode(){
+      const timerOn = document.querySelector('input[name="timed"][value="on"]');
+      const timerOff = document.querySelector('input[name="timed"][value="off"]');
+      const phonogramsSelected = MODE === 'P';
+
+      if(timerOn){
+        timerOn.disabled = !phonogramsSelected;
+        timerOn.checked = phonogramsSelected;
+      }
+      if(timerOff){
+        timerOff.checked = !phonogramsSelected;
+      }
+      updateStartButtonLabel();
+    }
+
     document.querySelectorAll('input[name="timed"]').forEach(r=>{
       r.addEventListener('change', ()=>{ updateStartButtonLabel(); });
     });
