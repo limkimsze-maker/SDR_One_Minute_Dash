@@ -1990,10 +1990,10 @@ th.left, td.left{
   <div class="seg" aria-label="Select item type">
     <button id="modeP" type="button" class="active" title="Practise phonograms taught up to the selected lesson">Phonograms</button>
     <button id="modeH" type="button" title="Practise high-frequency words taught up to the selected lesson">HFW</button>
-    <button id="modeW" type="button" title="Practise words from the current and previous two lessons">Words</button>
+    <button id="modeW" type="button" title="Practise words from the current and previous two trained sets at the selected level">Words</button>
   </div>
   <div class="hint" id="modeHint">
-    Phonograms/HFW include everything taught so far. Words include the <b>current + previous 2 lessons</b>.
+    Phonograms/HFW include everything taught so far. Words include the <b>current + previous 2 trained sets</b>. From Cycle 19, each Level is tracked separately.
   </div>
 </div>
 
@@ -4174,11 +4174,27 @@ if(focusStartBtn){
       return (MODE === 'P') ? collapseTwoSoundPhonogramsForDash(base, upToId) : base;
     }
 
+    function wordScopeIds(upToId){
+      const selected = parseSessionId(upToId);
+
+      // Cycles 1–18 continue to use the current and previous two sessions.
+      if(selected.cycle < 19){
+        const idx = SESSION_ORDER.indexOf(upToId);
+        if(idx < 0) return [];
+        return SESSION_ORDER.slice(Math.max(0, idx-2), idx+1);
+      }
+
+      // From Cycle 19, Level 1, Level 2 and Level 3 are separate learning
+      // tracks. Cycle 18 Sessions 2 and 3 provide the common starting bridge.
+      const levelTrack = [makeSessionId(18,2), makeSessionId(18,3)];
+      for(let cycle=19; cycle<=selected.cycle; cycle++){
+        levelTrack.push(makeSessionId(cycle, selected.session));
+      }
+      return levelTrack.slice(-3);
+    }
+
     function buildScopeWords3(upToId){
-      const idx = SESSION_ORDER.indexOf(upToId);
-      if(idx < 0) return [];
-      const start = Math.max(0, idx-2);
-      const ids = SESSION_ORDER.slice(start, idx+1);
+      const ids = wordScopeIds(upToId);
       const items = [];
       ids.forEach(sid=>{
         const list = WORD_DB[sid] || [];
@@ -4197,12 +4213,13 @@ if(focusStartBtn){
     function scopeSummary(upToId, pool){
       const kind = (MODE === 'P') ? 'Phonograms' : (MODE === 'HFW') ? 'High Frequency Words' : 'Words';
       if(MODE === 'W'){
-        const idx = SESSION_ORDER.indexOf(upToId);
-        const start = Math.max(0, idx-2);
-        const range = SESSION_ORDER.slice(start, idx+1);
-        const from = displaySessionId(range[0]);
-        const to = displaySessionId(range[range.length-1]);
-        return `Scope (${kind}): ${from} → ${to} (current + prev 2 sessions/levels) | Items in scope: ${pool.length}`;
+        const range = wordScopeIds(upToId);
+        const selected = parseSessionId(upToId);
+        const sequence = range.map(displaySessionId).join(' + ');
+        const rule = selected.cycle >= 19
+          ? `current + previous 2 trained sets for Level ${selected.session}`
+          : 'current + previous 2 sessions';
+        return `Scope (${kind}): ${sequence} (${rule}) | Items in scope: ${pool.length}`;
       }
       const title = TITLE_MAP[upToId] ? TITLE_MAP[upToId].replace(/^C\d+S\d+:\s*/,'') : '';
       const label = `${displaySessionId(upToId)}${title ? ' — '+title : ''}`;
